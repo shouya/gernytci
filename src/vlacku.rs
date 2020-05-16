@@ -69,6 +69,7 @@ impl Vlacku {
 
     for valsi_tcana in valsi_gunma {
       if let Some(valsi) = binxo_pa_valsi(valsi_tcana) {
+        // pu'o zukte .i julne fi loi tolci'o valsi (obsolete words)
         sorcu.push(Valsi::try_from(valsi));
       }
     }
