@@ -39,7 +39,7 @@ impl std::str::FromStr for Termonai {
     match s {
       "json" => Ok(Self::Json),
       "text" => Ok(Self::Text),
-      _ => Err(anyhow!("Invalid format, please use json or text"))
+      _ => Err(anyhow!("only 'json' or 'text' is allowed"))
     }
   }
 }
