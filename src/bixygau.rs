@@ -35,7 +35,7 @@ fn nerbei(vlacku: &mut Vlacku, krasi_sfaile: &Path) -> Result<()> {
     let tcana = valsi_tcana.element().ok_or(anyhow!("invalid xml"))?;
     let valsi = Valsi::try_from(tcana)?;
     // pu'o zukte .i julne fi loi tolci'o valsi (obsolete words)
-    vlacku.jmina(valsi)
+    vlacku.sorcu.push(valsi);
   }
 
   Ok(())

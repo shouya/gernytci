@@ -1,4 +1,6 @@
-use distance::levenshtein;
+use std::collections::BinaryHeap;
+
+use distance::damerau_levenshtein;
 use serde::Serialize;
 use serde_json;
 use structopt::StructOpt;
@@ -59,10 +61,21 @@ pub fn tamsmi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
     _ => unreachable!(),
   };
   let selsisku = tamsmi_tergaf.selsisku.clone();
-  let mut porsi = vlacku.sorcu.clone();
 
-  porsi.sort_by_key(|v| levenshtein(&v.cmene, &selsisku));
-  porsi.truncate(tamsmi_tergaf.klani);
+  let mut indice = BinaryHeap::new();
+
+  for (xo, vla) in vlacku.sorcu.iter().enumerate() {
+    let kaicla = damerau_levenshtein(&vla.cmene, &selsisku) as i32;
+    indice.push((-kaicla, xo))
+  }
+
+  let mut porsi = Vec::new();
+  for _ in 1..tamsmi_tergaf.klani {
+    match indice.pop() {
+      Some((_, xo)) => porsi.push(vlacku.sorcu[xo].clone()),
+      _ => ()
+    }
+  }
 
   Ok(Teryruhe { selsisku, porsi })
 }

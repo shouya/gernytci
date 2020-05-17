@@ -1,10 +1,12 @@
+use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use crate::kampu::*;
 use crate::sidju;
 
 use serde::{Deserialize, Serialize};
-use serde_json;
+use simd_json;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Valsi {
@@ -18,24 +20,29 @@ pub struct Valsi {
   pub pinka: Option<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Debug)]
 pub struct Vlacku {
   pub sorcu: Vec<Valsi>,
   pub pluta: PathBuf,
+  pub indice: RefCell<Option<BTreeMap<String, usize>>>,
 }
 
 impl Vlacku {
   pub fn tolsorcu(pluta: &Path) -> Result<Self> {
     if Path::exists(pluta) {
-      let sfaile_xadni = sidju::tolsorcu_sfaile(pluta)?;
+      let mut sfaile_xadni = sidju::tolsorcu_sfaile(pluta)?;
+      let sorcu = simd_json::from_str(&mut sfaile_xadni)?;
+
       Ok(Self {
-        sorcu: serde_json::from_str(&sfaile_xadni)?,
+        sorcu: sorcu,
         pluta: pluta.into(),
+        indice: RefCell::new(None)
       })
     } else {
       Ok(Self {
         sorcu: Vec::new(),
         pluta: pluta.into(),
+        indice: RefCell::new(None)
       })
     }
   }
@@ -46,7 +53,25 @@ impl Vlacku {
     Ok(())
   }
 
-  pub fn jmina(&mut self, valsi: Valsi) {
-    self.sorcu.push(valsi)
+  pub fn zvafahi(&self, cmene: &str) -> Option<Valsi> {
+    self.zbasu_indice();
+    self
+      .indice
+      .borrow()
+      .as_ref()
+      .unwrap()
+      .get(cmene)
+      .and_then(|xo| self.sorcu.get(*xo))
+      .map(|da| da.clone())
+  }
+
+  pub fn zbasu_indice(&self) {
+    if self.indice.borrow().is_none() {
+      let mut indice_zbasu = BTreeMap::new();
+      for (xo, vla) in self.sorcu.iter().enumerate() {
+        indice_zbasu.insert(vla.cmene.clone(), xo);
+      }
+      self.indice.replace(Some(indice_zbasu));
+    }
   }
 }
