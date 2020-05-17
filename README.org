@@ -4,7 +4,7 @@ This software contains a set of small Lojban related utilities.
 
 ** Installation
 
-Requirements: =rust 1.43=, SIMD supported platforms preferred
+Requirements: =rust 1.43=, preferably on SIMD supported platforms
 
 #+BEGIN_SRC bash
 git clone --depth=1 https://github.com/shouya/gernytci.git
@@ -21,15 +21,15 @@ USAGE:
 
 FLAGS:
     -h, --help            Prints help information
-    -o, --offcial-only    use entries from @official_data only
+    -o, --offcial-only    Use entries from @official_data only
     -V, --version         Prints version information
 
 OPTIONS:
-    -d, --dict <dict>        location to dict file [default: [built-in]]
-    -f, --format <format>    output colored "text" or machine-readble "json" [default: text]
+    -d, --dict <dict>        Location to dict file [default: [built-in]]
+    -f, --format <format>    Output colored "text" or machine-readble "json" [default: text]
 
 SUBCOMMANDS:
-    bixygau    Convert xml dump from jbovlaste (<dict> needs to be writable)
+    bixygau    Convert xml dump from jbovlaste
     help       Prints this message or the help of the given subcommand(s)
     tamsmi     Find words similar in shape
     zvafahi    Lookup dictionary
@@ -39,12 +39,17 @@ You can checkout the usage of each subcommand via =gernytci help <subcommand>=.
 
 ** Tools
 
-Roadmap:
+Planned features:
 
 - [X] tamsmi - find similar word in shape
 - [X] bixygau - convert jbovlaste dump file
 - [X] zvafahi - dictionary lookup
-- [ ] lujvo - "lujvo making tool"
+- [ ] lujvo making tool
+- [ ] lujvo decomposing tool
+- [ ] beta grammar checker (camxes)
+- [ ] BAI <=> gismu lookup
+- [ ] [[https://tatoeba.org/jbo/][Tatoeba]] search
+- [ ] more...
 
 *** tamsmi (find similar words)
 
@@ -70,7 +75,7 @@ Instructions:
 2. Run =gerytci -d <output_filename> <input_xml_filename>=; Note that
    You must specify =-d= option the output location of the generated
    dict file.
-3. Wait until it finishes. The generation processing will take a few minutes.
+3. Wait until it finishes. The generation process will take a few minutes.
 
 ** Copyright
 
