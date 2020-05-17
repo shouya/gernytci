@@ -1,5 +1,6 @@
 use std::collections::BinaryHeap;
 
+use difference::{Difference, Changeset};
 use distance::damerau_levenshtein;
 use serde::Serialize;
 use serde_json;
@@ -39,11 +40,17 @@ impl crate::TciTeryruhe for Teryruhe {
     println!("{} results found.", self.porsi.len().to_string().blue());
 
     for valsi in &self.porsi {
+      let mut frica = Changeset::new(&self.selsisku, &valsi.cmene, "");
+      frica.diffs.retain(|x| match x {
+        Difference::Rem(_) => false,
+        _ => true,
+      });
+
       println!(
         "{:cisni$} - {}",
-        valsi.cmene.green(),
+        frica,
         valsi.glosa.as_ref().unwrap_or(&"".into()),
-        cisni = cisni + 2
+        cisni = cisni + 1
       );
     }
   }
@@ -73,7 +80,7 @@ pub fn tamsmi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
   for _ in 1..tamsmi_tergaf.klani {
     match indice.pop() {
       Some((_, xo)) => porsi.push(vlacku.sorcu[xo].clone()),
-      _ => ()
+      _ => (),
     }
   }
 
