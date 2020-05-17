@@ -11,6 +11,6 @@ pub fn tolsorcu_sfaile(pluta: &Path) -> Result<String> {
 }
 
 pub fn sorcu_sfaile(pluta: &Path, xadni: &str) -> Result<()> {
-  File::open(pluta)?.write_all(xadni.as_bytes())?;
+  File::create(pluta)?.write_all(xadni.as_bytes())?;
   Ok(())
 }

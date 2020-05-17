@@ -1,11 +1,13 @@
-use structopt::StructOpt;
 use std::path::PathBuf;
 
+use structopt::StructOpt;
+
 // lei tutci
+mod bixygau;
 mod tamsmi; // zvafa'i loi simsa valsi lo ka tarmi
 
-mod sidju;
 mod kampu;
+mod sidju;
 mod vlacku;
 
 use kampu::*;
@@ -25,12 +27,13 @@ pub struct Tergalfi {
   vlacku: PathBuf,
 
   #[structopt(subcommand)]
-  minde: Minde
+  minde: Minde,
 }
 
+#[derive(Clone, Copy)]
 pub enum Termonai {
   Text,
-  Json
+  Json,
 }
 
 impl std::str::FromStr for Termonai {
@@ -39,7 +42,19 @@ impl std::str::FromStr for Termonai {
     match s {
       "json" => Ok(Self::Json),
       "text" => Ok(Self::Text),
-      _ => Err(anyhow!("only 'json' or 'text' is allowed"))
+      _ => Err(anyhow!("only 'json' or 'text' is allowed")),
+    }
+  }
+}
+
+trait TciTeryruhe {
+  fn termontai_lo_vlamei(&self);
+  fn termontai_lahe_jeison(&self);
+
+  fn ciska(&self, termontai: Termonai) {
+    match termontai {
+      Termonai::Text => self.termontai_lo_vlamei(),
+      Termonai::Json => self.termontai_lahe_jeison(),
     }
   }
 }
@@ -47,12 +62,22 @@ impl std::str::FromStr for Termonai {
 #[derive(StructOpt)]
 #[structopt()]
 pub enum Minde {
-  Tamsmi(tamsmi::Tergalfi)
+  Tamsmi(tamsmi::Tergalfi),
+  Bixygau(bixygau::Tergalfi),
 }
 
-
 fn main() -> Result<()> {
-  let _tergalfi = Tergalfi::from_args();
+  let tergalfi = Tergalfi::from_args();
+  let mut vlacku = vlacku::Vlacku::tolsorcu(&tergalfi.vlacku)?;
 
-  unimplemented!()
+  match &tergalfi.minde {
+    Minde::Tamsmi(_) => {
+      tamsmi::tamsmi(&tergalfi, &vlacku)?.ciska(tergalfi.termontai)
+    }
+    Minde::Bixygau(_) => {
+      bixygau::bixygau(&tergalfi, &mut vlacku)?.ciska(tergalfi.termontai)
+    }
+  }
+
+  Ok(())
 }
