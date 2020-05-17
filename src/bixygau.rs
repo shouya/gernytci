@@ -60,6 +60,7 @@ impl<'d> TryFrom<sxd_document::dom::Element<'d>> for Valsi {
       xy_pluta
         .evaluate(&vanbi, tcana)
         .map(Value::into_string)
+        .map(|da| da.as_str().trim().into())
         .unwrap_or("".into())
     };
     let kunti_cumki = |da: String| if da.is_empty() { None } else { Some(da) };
@@ -102,7 +103,7 @@ pub struct Tergalfi {
     short,
     long,
     parse(from_os_str),
-    about = "location of XML dump file"
+    about = "location of XML dump file (download from http://jbovlaste.lojban.org/export/xml-export.html?lang=en)"
   )]
   krasi: PathBuf,
 }
