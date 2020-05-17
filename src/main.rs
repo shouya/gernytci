@@ -3,8 +3,9 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 // lei tutci
-mod bixygau;
+mod bixygau; // bixygau fi lo vlacku sfaile
 mod tamsmi; // zvafa'i loi simsa valsi lo ka tarmi
+mod zvafahi; // zvafa'i da poi mapti lo se sisku
 
 mod kampu;
 mod sidju;
@@ -59,12 +60,15 @@ trait TciTeryruhe {
   }
 }
 
+
 #[derive(StructOpt)]
 #[structopt()]
 pub enum Minde {
   Tamsmi(tamsmi::Tergalfi),
   Bixygau(bixygau::Tergalfi),
+  Zvafahi(zvafahi::Tergalfi),
 }
+
 
 fn main() -> Result<()> {
   let tergalfi = Tergalfi::from_args();
@@ -76,6 +80,9 @@ fn main() -> Result<()> {
     }
     Minde::Bixygau(_) => {
       bixygau::bixygau(&tergalfi, &mut vlacku)?.ciska(tergalfi.termontai)
+    },
+    Minde::Zvafahi(_) => {
+      zvafahi::zvafahi(&tergalfi, &vlacku)?.ciska(tergalfi.termontai)
     }
   }
 

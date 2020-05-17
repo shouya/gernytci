@@ -53,7 +53,7 @@ impl<'d> TryFrom<sxd_document::dom::Element<'d>> for Valsi {
     let glosa = xy_pluta_pe_lo_valsi("glossword[1]/@word");
     let krasi = xy_pluta_pe_lo_valsi("user/username");
     let pinka = xy_pluta_pe_lo_valsi("notes");
-    let rafsi = Factory::new().build("rafsi/text()")?.unwrap();
+    let rafsi = Factory::new().build("rafsi")?.unwrap();
 
     let vanbi = Context::new();
     let facki = |xy_pluta: XPath| {
