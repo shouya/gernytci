@@ -27,3 +27,10 @@ pub fn sorcu_sfaile(pluta: &Path, xadni: &str) -> Result<()> {
   File::create(pluta)?.write_all(xadni.as_bytes())?;
   Ok(())
 }
+
+pub fn jinzi_vlacku_sfaile() -> Result<String> {
+  let jinzi: &'static [u8] = include_bytes!("../assets/vlacku.dict.gz");
+  let mut xadni = String::new();
+  GzDecoder::new(jinzi)?.read_to_string(&mut xadni)?;
+  Ok(xadni)
+}

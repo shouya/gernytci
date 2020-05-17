@@ -23,7 +23,7 @@ pub struct Tergalfi {
     short,
     long,
     parse(from_os_str),
-    default_value = "./vlacku.dict"
+    default_value = "[built-in]"
   )]
   vlacku: PathBuf,
 

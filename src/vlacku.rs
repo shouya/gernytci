@@ -29,22 +29,21 @@ pub struct Vlacku {
 
 impl Vlacku {
   pub fn tolsorcu(pluta: &Path) -> Result<Self> {
-    if Path::exists(pluta) {
-      let mut sfaile_xadni = sidju::tolsorcu_sfaile(pluta)?;
-      let sorcu = simd_json::from_str(&mut sfaile_xadni)?;
-
-      Ok(Self {
-        sorcu: sorcu,
-        pluta: pluta.into(),
-        indice: RefCell::new(None)
-      })
+    let mut sfaile_xadni = if pluta.to_str().unwrap() == "[built-in]" {
+      sidju::jinzi_vlacku_sfaile()?
+    } else if Path::exists(pluta) {
+      sidju::tolsorcu_sfaile(pluta)?
     } else {
-      Ok(Self {
-        sorcu: Vec::new(),
-        pluta: pluta.into(),
-        indice: RefCell::new(None)
-      })
-    }
+      "[]".into()
+    };
+
+    let sorcu = simd_json::from_str(&mut sfaile_xadni)?;
+
+    Ok(Self {
+      sorcu: sorcu,
+      pluta: pluta.into(),
+      indice: RefCell::new(None)
+    })
   }
 
   pub fn sorcu(&self) -> Result<()> {
