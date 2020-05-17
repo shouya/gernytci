@@ -90,6 +90,11 @@ pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
   zvati_smuni.sort_by(|da, de| de.1.vamji.partial_cmp(&da.1.vamji).unwrap());
   zvati_pinka.sort_by(|da, de| de.1.vamji.partial_cmp(&da.1.vamji).unwrap());
 
+  zvati_cmene.truncate(zvafahi_tergaf.klani);
+  zvati_glosa.truncate(zvafahi_tergaf.klani);
+  zvati_smuni.truncate(zvafahi_tergaf.klani);
+  zvati_pinka.truncate(zvafahi_tergaf.klani);
+
   Ok(Teryruhe {
     selsisku: zvafahi_tergaf.selsisku.clone(),
     morna,
