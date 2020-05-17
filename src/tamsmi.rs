@@ -38,6 +38,7 @@ impl crate::TciTeryruhe for Teryruhe {
     let cisni = self.porsi.iter().map(|x| x.cmene.len()).max().unwrap_or(0);
 
     println!("{} results found.", self.porsi.len().to_string().blue());
+    println!("----");
 
     for valsi in &self.porsi {
       let mut frica = Changeset::new(&self.selsisku, &valsi.cmene, "");

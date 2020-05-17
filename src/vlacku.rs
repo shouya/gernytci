@@ -53,6 +53,7 @@ impl Vlacku {
     Ok(())
   }
 
+  #[allow(dead_code)]
   pub fn zvafahi(&self, cmene: &str) -> Option<Valsi> {
     self.zbasu_indice();
     self
