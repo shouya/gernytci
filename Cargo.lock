@@ -76,6 +76,7 @@ dependencies = [
  "anyhow",
  "distance",
  "flate2",
+ "lazy_static",
  "serde",
  "serde_json",
  "structopt",

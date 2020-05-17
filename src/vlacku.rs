@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::path::Path;
 
 use crate::kampu::*;
@@ -48,11 +49,10 @@ impl Vlacku {
   pub fn nerbei(krasi_sfaile: &Path) -> Result<Self> {
     use sxd_xpath::{Context, Factory, Value};
     let sfaile_xadni = sidju::tolsorcu_sfaile(krasi_sfaile)?;
-    let uencu = xml_turfahi::parse(&sfaile_xadni)?.as_document();
+    let xml_xadni = xml_turfahi::parse(&sfaile_xadni)?;
+    let uencu = xml_xadni.as_document();
 
-    let fanri = Factory::new();
-
-    let valsi_pluta = fanri
+    let valsi_xy_pluta = Factory::new()
       .build(concat!(
         "//dictionary",
         r#"/direction[@from="lojban"][@to="English"]"#,
@@ -60,18 +60,18 @@ impl Vlacku {
       ))?
       .unwrap();
 
+    let valsi_gunma =
+      match valsi_xy_pluta.evaluate(&Context::new(), uencu.root())? {
+        Value::Nodeset(da) => da,
+        _ => return Err(anyhow!("invalid xml")),
+      };
+
     let mut sorcu = Vec::new();
-
-    let valsi_gunma = match valsi_pluta.evaluate(&vanbi, uencu.root())? {
-      Value::Nodeset(da) => da,
-      _ => return Err(anyhow!("invalid export structure")),
-    };
-
     for valsi_tcana in valsi_gunma {
-      if let Some(valsi) = binxo_pa_valsi(valsi_tcana) {
-        // pu'o zukte .i julne fi loi tolci'o valsi (obsolete words)
-        sorcu.push(Valsi::try_from(valsi));
-      }
+      let tcana = valsi_tcana.element().ok_or(anyhow!("invalid xml"))?;
+      let valsi = Valsi::try_from(tcana)?;
+      // pu'o zukte .i julne fi loi tolci'o valsi (obsolete words)
+      sorcu.push(valsi)
     }
 
     Ok(Vlacku { sorcu })
@@ -80,40 +80,43 @@ impl Vlacku {
 
 impl<'d> TryFrom<sxd_document::dom::Element<'d>> for Valsi {
   type Error = Error;
-  fn try_from(valsi_tcana: sxd_document::dom::Element<'d>) -> Result<Self> {
-    use sxd_xpath::{Context, Factory, Value};
+  fn try_from(tcana: sxd_document::dom::Element<'d>) -> Result<Self> {
+    use sxd_xpath::{Context, Factory, Value, XPath};
 
-    lazy_static! {
-      static ref fanri = Factory::new();
-
-      static ref pluta_zbasu = |pluta| {
-        fanri.build(format!("string(/vlasi/{})", pluta))?.unwrap();
-      }
-
-      static ref cmene = pluta_zbasu("@word");
-      static ref klesi = pluta_zbasu("@type");
-      static ref selmaho = pluta_zbasu("selmaho");
-      static ref glosa = pluta_zbasu("glossword[1]/@word");
-      static ref krasi = pluta_zbasu("user/username");
-      static ref pinka = pluta_zbasu("notes");
-      static ref rafsi = fanri.build("/valsi/rafsi/text()")?.unwrap();
-    }
+    let cmene = xy_pluta_pe_lo_valsi("@word");
+    let klesi = xy_pluta_pe_lo_valsi("@type");
+    let smuni = xy_pluta_pe_lo_valsi("definition");
+    let selmaho = xy_pluta_pe_lo_valsi("selmaho");
+    let glosa = xy_pluta_pe_lo_valsi("glossword[1]/@word");
+    let krasi = xy_pluta_pe_lo_valsi("user/username");
+    let pinka = xy_pluta_pe_lo_valsi("notes");
+    let rafsi = Factory::new().build("/valsi/rafsi/text()")?.unwrap();
 
     let vanbi = Context::new();
-    let valsi = valsi_tcana.element().ok_or(anyhow!("invalid DOM"))?;
-    let facki = |pluta| pluta.evaluate(&vanbi, valsi).map(Value::into_string());
-    let kunti_cumki = |da| if da.is_empty() { None } else { Some(da) };
+    let facki = |xy_pluta: XPath| {
+      xy_pluta
+        .evaluate(&vanbi, tcana)
+        .map(Value::into_string)
+        .unwrap_or("".into())
+    };
+    let kunti_cumki = |da: String| if da.is_empty() { None } else { Some(da) };
 
-    let ro_rafsi = dbg!(rafsi.evaluate(&vanbi, valsi));
+    let _ro_rafsi = dbg!(rafsi.evaluate(&vanbi, tcana));
 
     Ok(Valsi {
       cmene: facki(cmene),
       selmaho: facki(selmaho),
       glosa: kunti_cumki(facki(glosa)),
       smuni: kunti_cumki(facki(smuni)),
+      klesi: facki(klesi),
       rafsi: Vec::new(),
       krasi: facki(krasi),
-      pinka: faski(pinka),
+      pinka: kunti_cumki(facki(pinka)),
     })
   }
+}
+
+fn xy_pluta_pe_lo_valsi(pluta: &str) -> sxd_xpath::XPath {
+  let fanri = sxd_xpath::Factory::new();
+  fanri.build(&format!("string(/vlasi/{})", pluta)).unwrap().unwrap()
 }
