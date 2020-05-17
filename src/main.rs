@@ -15,7 +15,13 @@ use kampu::*;
 
 #[derive(StructOpt)]
 pub struct Tergalfi {
-  #[structopt(name = "format", short, long, default_value = "text")]
+  #[structopt(
+    name = "format",
+    short,
+    long,
+    default_value = "text",
+    help = "Output colored \"text\" or machine-readble \"json\""
+  )]
   termontai: Termonai,
 
   #[structopt(
@@ -23,12 +29,14 @@ pub struct Tergalfi {
     short,
     long,
     parse(from_os_str),
+    help = "Location to dict file",
     default_value = "[built-in]"
   )]
   vlacku: PathBuf,
 
   #[structopt(
-    name = "offcial_only",
+    name = "offcial-only",
+    help = "Use entries from @official_data only",
     short,
     long
   )]
@@ -67,7 +75,6 @@ trait TciTeryruhe {
   }
 }
 
-
 #[derive(StructOpt)]
 #[structopt()]
 pub enum Minde {
@@ -75,7 +82,6 @@ pub enum Minde {
   Bixygau(bixygau::Tergalfi),
   Zvafahi(zvafahi::Tergalfi),
 }
-
 
 fn main() -> Result<()> {
   let tergalfi = Tergalfi::from_args();
@@ -91,7 +97,7 @@ fn main() -> Result<()> {
     }
     Minde::Bixygau(_) => {
       bixygau::bixygau(&tergalfi, &mut vlacku)?.ciska(tergalfi.termontai)
-    },
+    }
     Minde::Zvafahi(_) => {
       zvafahi::zvafahi(&tergalfi, &vlacku)?.ciska(tergalfi.termontai)
     }

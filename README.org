@@ -17,15 +17,16 @@ cargo install --path gernytci
 gernytci 0.1.0
 
 USAGE:
-    gernytci [OPTIONS] <SUBCOMMAND>
+    gernytci [FLAGS] [OPTIONS] <SUBCOMMAND>
 
 FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+    -h, --help            Prints help information
+    -o, --offcial-only    use entries from @official_data only
+    -V, --version         Prints version information
 
 OPTIONS:
-    -d, --dict <dict>         [default: [built-in]]
-    -f, --format <format>     [default: text]
+    -d, --dict <dict>        location to dict file [default: [built-in]]
+    -f, --format <format>    output colored "text" or machine-readble "json" [default: text]
 
 SUBCOMMANDS:
     bixygau    Convert xml dump from jbovlaste (<dict> needs to be writable)

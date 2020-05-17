@@ -95,7 +95,8 @@ fn xy_pluta_pe_lo_valsi(pluta: &str) -> sxd_xpath::XPath {
 #[derive(StructOpt)]
 #[structopt(
   name = "convert",
-  about = "Convert xml dump from jbovlaste (<dict> needs to be writable)"
+  about = "Convert xml dump from jbovlaste",
+  long_about = "Convert xml dump from jbovlaste (<dict> must be writable)",
 )]
 pub struct Tergalfi {
   #[structopt(
@@ -103,7 +104,7 @@ pub struct Tergalfi {
     short,
     long,
     parse(from_os_str),
-    about = "location of XML dump file (download from http://jbovlaste.lojban.org/export/xml-export.html?lang=en)"
+    help = "Location of XML dump file"
   )]
   krasi: PathBuf,
 }

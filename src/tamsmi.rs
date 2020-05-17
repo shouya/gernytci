@@ -16,7 +16,7 @@ pub struct Tergalfi {
     name = "count",
     short,
     long,
-    about = "Number of results to return",
+    help = "Number of results to return",
     default_value = "10"
   )]
   klani: usize,
