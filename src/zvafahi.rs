@@ -72,10 +72,6 @@ pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
       ..
     } = valsi;
 
-    if krasi != "officialdata" {
-      continue;
-    }
-
     if troci_mapti(&mut zvati_cmene, &Some(cmene.clone()), valsi) {
       continue;
     }

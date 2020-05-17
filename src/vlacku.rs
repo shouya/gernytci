@@ -46,6 +46,10 @@ impl Vlacku {
     })
   }
 
+  pub fn catni_poho(&mut self) {
+    self.sorcu.retain(|x| x.krasi == "officialdata")
+  }
+
   pub fn sorcu(&self) -> Result<()> {
     let lerpoi = serde_json::to_string(&self.sorcu)?;
     sidju::sorcu_sfaile(&self.pluta, &lerpoi)?;

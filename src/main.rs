@@ -27,6 +27,13 @@ pub struct Tergalfi {
   )]
   vlacku: PathBuf,
 
+  #[structopt(
+    name = "offcial_only",
+    short,
+    long
+  )]
+  catni_poho: bool,
+
   #[structopt(subcommand)]
   minde: Minde,
 }
@@ -73,6 +80,10 @@ pub enum Minde {
 fn main() -> Result<()> {
   let tergalfi = Tergalfi::from_args();
   let mut vlacku = vlacku::Vlacku::tolsorcu(&tergalfi.vlacku)?;
+
+  if tergalfi.catni_poho {
+    vlacku.catni_poho();
+  }
 
   match &tergalfi.minde {
     Minde::Tamsmi(_) => {
