@@ -20,6 +20,22 @@ pub struct Valsi {
   pub pinka: Option<String>,
 }
 
+impl Valsi {
+  pub fn cpacu(&self, ckaji: &str) -> Option<String> {
+    match ckaji {
+      "cmene" => Some(self.cmene.clone()),
+      "klesi" => Some(self.klesi.clone()),
+      "selmaho" => self.selmaho.clone(),
+      "glosa" => self.glosa.clone(),
+      "smuni" => self.smuni.clone(),
+      "rafsi" => None,
+      "krasi" => Some(self.krasi.clone()),
+      "pinka" => self.pinka.clone(),
+      _ => None
+    }
+  }
+}
+
 #[derive(Clone, Debug)]
 pub struct Vlacku {
   pub sorcu: Vec<Valsi>,

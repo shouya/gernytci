@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use colored::*;
 use itertools::Itertools;
 use serde::Serialize;
@@ -14,7 +16,7 @@ pub struct Tergalfi {
     short,
     long,
     help = "Number of results to return",
-    default_value = "10"
+    default_value = "5"
   )]
   klani: usize,
 
@@ -28,14 +30,13 @@ struct Mapti {
   vamji: f32,
 }
 
+static RO_CKAJI: &[&str] = &["cmene", "glosa", "smuni", "pinka"];
+
 #[derive(Clone, Serialize, Debug)]
 pub struct Teryruhe {
   selsisku: String,
   morna: Morna,
-  zvati_cmene: Vec<(Valsi, Mapti)>,
-  zvati_glosa: Vec<(Valsi, Mapti)>,
-  zvati_smuni: Vec<(Valsi, Mapti)>,
-  zvati_pinka: Vec<(Valsi, Mapti)>,
+  zvati: HashMap<&'static str, Vec<Valsi>>,
 }
 
 pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
@@ -46,62 +47,39 @@ pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
     _ => unreachable!(),
   };
   let morna = zbasu_morna(&zvafahi_tergaf.selsisku);
-  let mut zvati_cmene = Vec::new();
-  let mut zvati_glosa = Vec::new();
-  let mut zvati_smuni = Vec::new();
-  let mut zvati_pinka = Vec::new();
+  let mut zvati: HashMap<&str, _> = HashMap::new();
 
-  let troci_mapti =
-    |vasru: &mut Vec<_>, selzvati: &Option<String>, valsi: &Valsi| {
-      let mat = mapti(&morna, &selzvati.as_ref().unwrap_or(&"".into()));
-      if mat.selkanpe.len() > 0 {
-        vasru.push((valsi.clone(), mat));
-        true
-      } else {
-        false
-      }
-    };
+  for ckaji in RO_CKAJI.iter() {
+    zvati.insert(ckaji, Vec::new());
+  }
 
   for valsi in vlacku.sorcu.iter() {
-    let Valsi {
-      cmene,
-      glosa,
-      smuni,
-      pinka,
-      ..
-    } = valsi;
-
-    if troci_mapti(&mut zvati_cmene, &Some(cmene.clone()), valsi) {
-      continue;
-    }
-    if troci_mapti(&mut zvati_glosa, glosa, valsi) {
-      continue;
-    }
-    if troci_mapti(&mut zvati_smuni, smuni, valsi) {
-      continue;
-    }
-    if troci_mapti(&mut zvati_pinka, pinka, valsi) {
-      continue;
+    for ckaji in RO_CKAJI {
+      let vlamei = valsi.cpacu(ckaji).unwrap_or("".into());
+      let mat = mapti(&morna, &vlamei);
+      if mat.selkanpe.len() > 0 {
+        zvati.get_mut(ckaji).unwrap().push((valsi.clone(), mat));
+        break;
+      }
     }
   }
 
-  zvati_cmene.sort_by(|da, de| de.1.vamji.partial_cmp(&da.1.vamji).unwrap());
-  zvati_glosa.sort_by(|da, de| de.1.vamji.partial_cmp(&da.1.vamji).unwrap());
-  zvati_smuni.sort_by(|da, de| de.1.vamji.partial_cmp(&da.1.vamji).unwrap());
-  zvati_pinka.sort_by(|da, de| de.1.vamji.partial_cmp(&da.1.vamji).unwrap());
+  for liste in zvati.values_mut() {
+    liste.sort_by(|da, de| de.1.vamji.partial_cmp(&da.1.vamji).unwrap());
+    liste.truncate(zvafahi_tergaf.klani);
+  }
 
-  zvati_cmene.truncate(zvafahi_tergaf.klani);
-  zvati_glosa.truncate(zvafahi_tergaf.klani);
-  zvati_smuni.truncate(zvafahi_tergaf.klani);
-  zvati_pinka.truncate(zvafahi_tergaf.klani);
+  let zvati = zvati
+    .into_iter()
+    .map(|(ckiku, dacti)| {
+      (ckiku, dacti.into_iter().map(|(da, _)| da).collect())
+    })
+    .collect();
 
   Ok(Teryruhe {
     selsisku: zvafahi_tergaf.selsisku.clone(),
-    morna,
-    zvati_cmene,
-    zvati_glosa,
-    zvati_smuni,
-    zvati_pinka,
+    morna: morna,
+    zvati: zvati,
   })
 }
 
@@ -154,17 +132,17 @@ fn mapti(morna: &Morna, selzvati: &str) -> Mapti {
 
 impl crate::TciTeryruhe for Teryruhe {
   fn termontai_lo_vlamei(&self) {
-    prina_pagbu("Word", &self.zvati_cmene, &self.morna);
-    prina_pagbu("Gloss", &self.zvati_glosa, &self.morna);
-    prina_pagbu("Definition", &self.zvati_smuni, &self.morna);
-    prina_pagbu("Notes", &self.zvati_pinka, &self.morna);
+    prina_pagbu("Word", &self.zvati["cmene"], &self.morna);
+    prina_pagbu("Gloss", &self.zvati["glosa"], &self.morna);
+    prina_pagbu("Definition", &self.zvati["smuni"], &self.morna);
+    prina_pagbu("Notes", &self.zvati["pinka"], &self.morna);
   }
   fn termontai_lahe_jeison(&self) {
     println!("{}", serde_json::to_string(self).unwrap());
   }
 }
 
-fn prina_pagbu(pagbu_cmene: &str, liste: &Vec<(Valsi, Mapti)>, morna: &Morna) {
+fn prina_pagbu(pagbu_cmene: &str, liste: &Vec<Valsi>, morna: &Morna) {
   if liste.len() == 0 {
     return;
   }
@@ -175,7 +153,7 @@ fn prina_pagbu(pagbu_cmene: &str, liste: &Vec<(Valsi, Mapti)>, morna: &Morna) {
     pagbu_cmene.bold().blue()
   );
 
-  for (vla, _mat) in liste {
+  for vla in liste {
     prina_valsi(vla, morna);
   }
 
@@ -228,10 +206,3 @@ fn skagau_lerpoi(lerpoi: &str, morna: &Morna) -> String {
   }
   jalge
 }
-
-//   selsisku: String,
-//   zvati_cmene: Vec<(Valsi, Mapti)>,
-//   zvati_glosa: Vec<(Valsi, Mapti)>,
-//   zvati_smuni: Vec<(Valsi, Mapti)>,
-//   zvati_pinka: Vec<(Valsi, Mapti)>,
-// }
