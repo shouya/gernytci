@@ -1,0 +1,89 @@
+* Lojban Toolkit
+
+This software contains a set of small Lojban related utilities.
+
+** Installation
+
+Requirements: =rust 1.43=, SIMD supported platforms preferred
+
+#+BEGIN_SRC bash
+git clone --depth=1 https://github.com/shouya/gernytci.git
+cargo install --path gernytci
+#+END_SRC
+
+** Help
+
+#+BEGIN_SRC bash
+gernytci 0.1.0
+
+USAGE:
+    gernytci [OPTIONS] <SUBCOMMAND>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -d, --dict <dict>         [default: [built-in]]
+    -f, --format <format>     [default: text]
+
+SUBCOMMANDS:
+    bixygau    Convert xml dump from jbovlaste (<dict> needs to be writable)
+    help       Prints this message or the help of the given subcommand(s)
+    tamsmi     Find words similar in shape
+    zvafahi    Lookup dictionary
+#+END_SRC
+
+You can checkout the usage of each subcommand via =gernytci help <subcommand>=.
+
+** Tools
+
+Roadmap:
+
+- [X] tamsmi - find similar word in shape
+- [X] bixygau - convert jbovlaste dump file
+- [X] zvafahi - dictionary lookup
+- [ ] lujvo - "lujvo making tool"
+
+*** tamsmi (find similar words)
+
+#+CAPTION: Screenshot of a demo usage for "tamsmi"
+#+NAME:   fig:tamsmi_vidnyxra
+[[https://user-images.githubusercontent.com/526598/82159790-722fc780-98c3-11ea-9058-ff92cdf08cad.png]]
+
+*** zvafahi (lookup in dictionary)
+
+#+CAPTION: Screenshot of a demo usage for "zvafahi"
+#+NAME:   fig:zvafahi_vidnyxra
+[[https://user-images.githubusercontent.com/526598/82159822-af945500-98c3-11ea-8b00-2394b79892f2.png]]
+
+*** bixygau (convert jbovlaste XML dump to json)
+
+You generally don't need this, as this tool has built-in dictionary
+(jbo-en) included in the binary. If you want to customize or use the
+dictionary for other languages, you can use this tool.
+
+Instructions:
+
+1. Download the export from [[http://jbovlaste.lojban.org/export/xml.html][here]].
+2. Run =gerytci -d <output_filename> <input_xml_filename>=; Note that
+   You must specify =-d= option the output location of the generated
+   dict file.
+3. Wait until it finishes. The generation processing will take a few minutes.
+
+** Copyright
+
+Copyright 2020 Shou Ya
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/.
