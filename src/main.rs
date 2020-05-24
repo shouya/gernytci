@@ -6,6 +6,7 @@ use structopt::StructOpt;
 mod bixygau; // bixygau fi lo vlacku sfaile
 mod tamsmi; // zvafa'i loi simsa valsi lo ka tarmi
 mod zvafahi; // zvafa'i da poi mapti lo se sisku
+mod tanru;
 
 mod kampu;
 mod sidju;
