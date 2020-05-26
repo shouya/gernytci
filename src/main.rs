@@ -82,6 +82,7 @@ pub enum Minde {
   Tamsmi(tamsmi::Tergalfi),
   Bixygau(bixygau::Tergalfi),
   Zvafahi(zvafahi::Tergalfi),
+  Tanru(tanru::Tergalfi)
 }
 
 fn main() -> Result<()> {
@@ -101,6 +102,9 @@ fn main() -> Result<()> {
     }
     Minde::Zvafahi(_) => {
       zvafahi::zvafahi(&tergalfi, &vlacku)?.ciska(tergalfi.termontai)
+    }
+    Minde::Tanru(_) => {
+      tanru::tanru(&tergalfi, &vlacku)?.ciska(tergalfi.termontai)
     }
   }
 
