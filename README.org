@@ -44,8 +44,8 @@ Planned features:
 - [X] tamsmi - find similar word in shape
 - [X] bixygau - convert jbovlaste dump file
 - [X] zvafahi - dictionary lookup
+- [X] tanru - lujvo decomposing tool
 - [ ] lujvo making tool
-- [ ] lujvo decomposing tool
 - [ ] beta grammar checker (camxes)
 - [ ] BAI <=> gismu lookup
 - [ ] [[https://tatoeba.org/jbo/][Tatoeba]] search
