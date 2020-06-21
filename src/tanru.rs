@@ -25,8 +25,15 @@ impl crate::TciTeryruhe for Teryruhe {
     let rafsi: String = self
       .rafsi
       .iter()
-      .map(|da| da.to_string())
-      .map(|da| da.blue().to_string())
+      .map(|da| {
+        format!(
+          "{}{}",
+          da.rafsi.blue(),
+          da.terjonlehu
+            .map(|x| x.to_string().white().to_string())
+            .unwrap_or("".into())
+        )
+      })
       .collect::<Vec<_>>()
       .join("/");
 
@@ -132,6 +139,7 @@ enum Gimlei {
 struct Rafsi {
   klesi: Raflei,
   rafsi: String,
+  terjonlehu: Option<char>,
 }
 
 impl ToString for Rafsi {
@@ -182,6 +190,7 @@ fn gismu_zvafahi(lujvo: &str) -> Option<Rafsi> {
   gismu_klesi(&lujvo[0..5]).map(|gimlei| Rafsi {
     klesi: Raflei::Gismu(gimlei),
     rafsi: (&lujvo[0..5]).into(),
+    terjonlehu: None,
   })
 }
 
@@ -190,6 +199,7 @@ fn rafsi_zvafahi(lujvo: &str) -> Option<Rafsi> {
     return Some(Rafsi {
       klesi,
       rafsi: (&lujvo[0..3]).into(),
+      terjonlehu: None,
     });
   }
 
@@ -197,6 +207,7 @@ fn rafsi_zvafahi(lujvo: &str) -> Option<Rafsi> {
     return Some(Rafsi {
       klesi,
       rafsi: (&lujvo[0..4]).into(),
+      terjonlehu: None,
     });
   }
 
@@ -211,7 +222,8 @@ fn brarafsi_zvafahi(lujvo: &str) -> Option<Rafsi> {
   gismu_klesi(&format!("{}{}", &lujvo[0..4], 'a')).map(|_| {
     return Rafsi {
       klesi: Raflei::Brarafsi,
-      rafsi: (&lujvo[0..5]).into(),
+      rafsi: (&lujvo[0..4]).into(),
+      terjonlehu: Some('y'),
     };
   })
 }
@@ -239,7 +251,8 @@ fn rafsi_ceho_terjonlehu_zvafahi(lujvo: &str) -> Option<Rafsi> {
     if seltau_klesi == CVC && !CURMI_ZUNSNA_REMEI.contains(&(pa, re)) {
       return Some(Rafsi {
         klesi: seltau_klesi,
-        rafsi: (&lujvo[0..4]).into(),
+        rafsi: (&lujvo[0..3]).into(),
+        terjonlehu: Some('y'),
       });
     } else {
       return None;
@@ -255,7 +268,8 @@ fn rafsi_ceho_terjonlehu_zvafahi(lujvo: &str) -> Option<Rafsi> {
     if seltau_klesi == CVV && tertau_klesi != CCV {
       return Some(Rafsi {
         klesi: seltau_klesi,
-        rafsi: (&lujvo[0..4]).into(),
+        rafsi: (&lujvo[0..3]).into(),
+        terjonlehu: Some(terjonlehu),
       });
     } else {
       return None;
@@ -265,7 +279,8 @@ fn rafsi_ceho_terjonlehu_zvafahi(lujvo: &str) -> Option<Rafsi> {
   if seltau_klesi == CVV {
     return Some(Rafsi {
       klesi: seltau_klesi,
-      rafsi: (&lujvo[0..4]).into(),
+      rafsi: (&lujvo[0..3]).into(),
+      terjonlehu: Some(terjonlehu),
     });
   }
 
