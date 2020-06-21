@@ -239,7 +239,7 @@ fn rafsi_ceho_terjonlehu_zvafahi(lujvo: &str) -> Option<Rafsi> {
   };
 
   let seltau = &lujvo[0..3];
-  let tertau = &lujvo[4..7];
+  let tertau = &lujvo[4..7.min(lujvo.len())];
   let drata_tertau = &lujvo[4..8.min(lujvo.len())]; // lu famy[ma'o] li'u mu'a
 
   let seltau_klesi = rafsi_klesi(seltau)?;
