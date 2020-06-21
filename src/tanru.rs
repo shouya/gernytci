@@ -228,9 +228,10 @@ fn rafsi_ceho_terjonlehu_zvafahi(lujvo: &str) -> Option<Rafsi> {
 
   let seltau = &lujvo[0..3];
   let tertau = &lujvo[4..7];
+  let drata_tertau = &lujvo[4..8.min(lujvo.len())]; // lu famy[ma'o] li'u mu'a
 
   let seltau_klesi = rafsi_klesi(seltau)?;
-  let tertau_klesi = rafsi_klesi(tertau)?;
+  let tertau_klesi = rafsi_klesi(tertau).or(rafsi_klesi(drata_tertau))?;
 
   if terjonlehu == 'y' {
     let pa = seltau.chars().nth(2).unwrap();
@@ -388,12 +389,14 @@ mod tests {
   fn cipra_katna_lujvo() {
     xusra_katna("saicli", "sai/cli");
     xusra_katna("saiclire", "sai/clire");
-    xusra_katna("sanmycli", "sanm/cli");
-    xusra_katna("sanmycilre", "sanm/cilre");
+    xusra_katna("sanmycli", "sanmy/cli");
+    xusra_katna("sanmycilre", "sanmy/cilre");
     xusra_katna("zvaju'o", "zva/ju'o");
     xusra_katna("ju'ozva", "ju'o/zva");
     xusra_katna("ju'ozva", "ju'o/zva");
     xusra_katna("cmeterge'a", "cme/ter/ge'a");
+
+    xusra_katna("famyma'o", "famy/ma'o");
 
     assert!(katna_lujvo("saiycli").is_none());
     assert!(katna_lujvo("saircli").is_none());
