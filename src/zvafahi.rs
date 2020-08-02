@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use colored::*;
-use itertools::Itertools;
 use serde::Serialize;
 use structopt::StructOpt;
 
@@ -21,7 +20,7 @@ pub struct Tergalfi {
   klani: usize,
 
   #[structopt(name = "text")]
-  selsisku: String,
+  selsisku: Vec<String>,
 }
 
 #[derive(Clone, Serialize, Debug)]
@@ -34,7 +33,7 @@ static RO_CKAJI: &[&str] = &["cmene", "glosa", "smuni", "pinka"];
 
 #[derive(Clone, Serialize, Debug)]
 pub struct Teryruhe {
-  selsisku: String,
+  selsisku: Vec<String>,
   morna: Morna,
   zvati: HashMap<&'static str, Vec<Valsi>>,
 }
@@ -46,7 +45,7 @@ pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
     Zvafahi(da) => da,
     _ => unreachable!(),
   };
-  let morna = zbasu_morna(&zvafahi_tergaf.selsisku);
+  let morna = zbasu_morna(zvafahi_tergaf.selsisku.as_slice());
   let mut zvati: HashMap<&str, _> = HashMap::new();
 
   for ckaji in RO_CKAJI.iter() {
@@ -85,14 +84,11 @@ pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
 
 type Morna = Vec<(String, f32)>;
 
-pub fn zbasu_morna(selsisku: &str) -> Morna {
+pub fn zbasu_morna(selsisku: &[String]) -> Morna {
   let mut jalge = Vec::new();
-  for (da, de) in selsisku.split_whitespace().into_iter().tuple_windows() {
-    jalge.push((format!("{} {}", da, de), 2.0));
-  }
 
-  for da in selsisku.split_whitespace() {
-    jalge.push((da.into(), 1.0));
+  for da in selsisku {
+    jalge.push((da.to_string(), 1.0));
   }
 
   for (da, junta) in jalge.clone() {
