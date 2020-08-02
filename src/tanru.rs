@@ -286,7 +286,7 @@ impl Rafpoi {
     }
 
     // cipcta lo du'u loi rafsi remei ku jo'u lo terjonle'u cu sarxe
-    for (seltau, tertau) in porsi.iter().tuples() {
+    for (seltau, tertau) in porsi.iter().tuple_windows() {
       let terjonlehu = seltau.terjonlehu;
       let pa = seltau.rafsi.chars().last().unwrap();
       let re = tertau.rafsi.chars().last().unwrap();
