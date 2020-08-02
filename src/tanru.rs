@@ -1,6 +1,7 @@
 use crate::kampu::*;
 use crate::vlacku::{Valsi, Vlacku};
 
+use itertools::Itertools;
 use serde::Serialize;
 use serde_json;
 use structopt::StructOpt;
@@ -13,8 +14,11 @@ pub struct Tergalfi {
 }
 
 #[derive(Clone, Serialize, Debug)]
+pub struct Rafpoi(Vec<Rafsi>);
+
+#[derive(Clone, Serialize, Debug)]
 pub struct Teryruhe {
-  rafsi: Vec<Rafsi>,
+  rafsi: Rafpoi,
   tanru: Vec<Option<Valsi>>,
 }
 
@@ -24,6 +28,7 @@ impl crate::TciTeryruhe for Teryruhe {
 
     let rafsi: String = self
       .rafsi
+      .cpacu()
       .iter()
       .map(|da| {
         format!(
@@ -40,7 +45,7 @@ impl crate::TciTeryruhe for Teryruhe {
     let tanru: String = self
       .tanru
       .iter()
-      .zip(self.rafsi.iter())
+      .zip(self.rafsi.cpacu().iter())
       .map(|(da, de)| match da {
         Some(Valsi { cmene, .. }) => cmene.clone(),
         None => de.to_string(),
@@ -77,32 +82,16 @@ pub fn tanru(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
     _ => unreachable!(),
   };
 
-  let rafsi = match katna_lujvo(tamsmi_tergaf.lujvo.as_str()) {
-    Some(raf) => raf,
-    None => vec![],
-  };
-
-  let tanru = rafsi.iter().map(|raf| sisku_tanru(raf, vlacku)).collect();
-
-  Ok(Teryruhe { rafsi, tanru })
-}
-
-fn sisku_tanru(rafsi: &Rafsi, vlacku: &Vlacku) -> Option<Valsi> {
-  use Raflei::*;
-
-  for valsi in &vlacku.sorcu {
-    let found = match rafsi.klesi {
-      Brarafsi => valsi.cmene.starts_with(&rafsi.rafsi[0..4]),
-      Gismu(_) => valsi.cmene == rafsi.rafsi,
-      _ => valsi.rafsi.contains(&rafsi.rafsi),
-    };
-
-    if found {
-      return Some(valsi.clone());
+  match Rafpoi::genturfahi(tamsmi_tergaf.lujvo.as_str()).as_slice() {
+    [] => return Err(anyhow!("not found")),
+    [rafpoi] => {
+      return Ok(Teryruhe {
+        rafsi: rafpoi.clone(),
+        tanru: rafpoi.vlaste_sisku(vlacku),
+      })
     }
+    [..] => return Err(anyhow!("multiple results found")),
   }
-
-  None
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
@@ -117,7 +106,7 @@ enum Raflei {
 }
 
 impl Raflei {
-  fn len(&self) -> usize {
+  fn selpormei(&self) -> usize {
     use Raflei::*;
     match self {
       CVC | CCV | CVV => 3,
@@ -125,6 +114,227 @@ impl Raflei {
       Brarafsi => 4,
       Gismu(_) => 5,
     }
+  }
+}
+
+impl Raflei {
+  fn lidne_mapti(lujvo: &str) -> Vec<Raflei> {
+    if lujvo.len() < 3 {
+      return vec![];
+    }
+
+    let mut cumki = vec![];
+
+    for i in 3..=5 {
+      match lujvo.get(0..i).and_then(|x| Self::mapti(x)) {
+        Some(da) => cumki.push(da),
+        _ => {}
+      }
+    }
+
+    cumki
+  }
+
+  fn mapti(rafsi: &str) -> Option<Raflei> {
+    use Gimlei::*;
+    use Raflei::*;
+
+    if rafsi.len() < 3 || rafsi.len() > 5 {
+      return None;
+    }
+
+    match lerfu_sanse(rafsi).as_str() {
+      "CVC" => Some(CVC),
+      "CCV" => Some(CCV),
+      "CV'V" => Some(CVhV),
+      "CVV" => Some(CVV),
+      "CVCCV" => Some(Gismu(CVCCV)),
+      "CCVCV" => Some(Gismu(CCVCV)),
+      "CVCC" => Some(Brarafsi),
+      "CCVC" => Some(Brarafsi),
+      _ => None,
+    }
+  }
+}
+
+impl Rafsi {
+  fn selpormei(&self) -> usize {
+    self.klesi.selpormei() + self.terjonlehu.map(|_| 1).unwrap_or(0)
+  }
+
+  // spuda fi loi romei cumki
+  fn genturfahi_bavlahi(lujvo: &str) -> Vec<Self> {
+    let mut cumki = Vec::new();
+
+    for raflei in Raflei::lidne_mapti(lujvo) {
+      // pamoi cumki: lo sevzi
+      cumki.push(Rafsi {
+        klesi: raflei.clone(),
+        rafsi: lujvo[0..raflei.selpormei()].to_string(),
+        terjonlehu: None,
+      });
+
+      // remoi cumki: lo sevzi ce'o pa terjonle'u
+      if let Some(lerfu) = lujvo[raflei.selpormei()..].chars().next() {
+        cumki.push(Rafsi {
+          klesi: raflei.clone(),
+          rafsi: lujvo[0..raflei.selpormei()].to_string(),
+          terjonlehu: Some(lerfu),
+        });
+      }
+    }
+
+    cumki.dedup();
+    cumki.into_iter().filter(|x| x.jvasahe()).collect()
+  }
+
+  fn jvasahe(&self) -> bool {
+    use Raflei::*;
+
+    match self.klesi {
+      Gismu(_) => self.terjonlehu == None,
+      Brarafsi => self.terjonlehu == Some('y'),
+      CVC | CCV | CVhV | CVV if self.terjonlehu == None => true,
+      CVC | CCV | CVhV | CVV => self.rafsi_terjonlehu_jvasahe(),
+    }
+  }
+
+  fn rafsi_terjonlehu_jvasahe(&self) -> bool {
+    use Raflei::*;
+    let klesi = match &self.klesi {
+      Gismu(_) | Brarafsi => panic!("Invalid input"),
+      klesi => klesi.clone(),
+    };
+
+    let terjonlehu = match self.terjonlehu {
+      None => return true,
+      Some('y') | Some('r') | Some('n') => self.terjonlehu.unwrap(),
+      _ => return false,
+    };
+
+    if terjonlehu == 'y' && klesi == CVC {
+      true
+    } else if terjonlehu == 'r' && klesi == CVV {
+      true
+    } else if terjonlehu == 'n' && klesi == CVV {
+      true
+    } else {
+      false
+    }
+  }
+
+  fn vlaste_sisku(&self, vlacku: &Vlacku) -> Option<Valsi> {
+    use Raflei::*;
+
+    for valsi in &vlacku.sorcu {
+      let found = match self.klesi {
+        Brarafsi => valsi.cmene.starts_with(&self.rafsi[0..4]),
+        Gismu(_) => valsi.cmene == self.rafsi,
+        _ => valsi.rafsi.contains(&self.rafsi),
+      };
+
+      if found {
+        return Some(valsi.clone());
+      }
+    }
+
+    None
+  }
+
+  fn xu_sampu(&self) -> bool {
+    use Raflei::*;
+
+    match self.klesi {
+      Gismu(_) | Brarafsi => false,
+      _ => true,
+    }
+  }
+}
+
+impl Rafpoi {
+  fn kunti() -> Self {
+    Self(vec![])
+  }
+
+  fn cpacu(&self) -> &Vec<Rafsi> {
+    &self.0
+  }
+
+  fn stedu_setca(&mut self, rafsi: Rafsi) {
+    self.0 = [vec![rafsi], self.0.clone()].concat();
+  }
+
+  fn jvasahe(&self) -> bool {
+    use Raflei::*;
+
+    let porsi = &self.0;
+
+    if porsi.len() <= 1 {
+      return true;
+    }
+
+    // no sumti cu naku ka'e zvati da'a lo mulfa'o
+    let (romoi, loi_drata) = porsi.as_slice().split_last().unwrap();
+    for rafsi in loi_drata {
+      if let Gismu(_) = rafsi.klesi {
+        return false;
+      }
+    }
+
+    if let Some(_) = romoi.terjonlehu {
+      return false;
+    }
+
+    // cipcta lo du'u loi rafsi remei ku jo'u lo terjonle'u cu sarxe
+    for (seltau, tertau) in porsi.iter().tuples() {
+      let terjonlehu = seltau.terjonlehu;
+      let pa = seltau.rafsi.chars().last().unwrap();
+      let re = tertau.rafsi.chars().last().unwrap();
+
+      if !(seltau.xu_sampu() && tertau.xu_sampu()) {
+        continue;
+      }
+
+      if terjonlehu == Some('y') {
+        if seltau.klesi != CVC || CURMI_ZUNSNA_REMEI.contains(&(pa, re)) {
+          return false;
+        }
+      }
+
+      if terjonlehu == Some('n') || terjonlehu == Some('r') {
+        if terjonlehu == Some('n') && re != 'r' {
+          return false;
+        }
+
+        if seltau.klesi != CVV || tertau.klesi == CCV {
+          return false;
+        }
+      }
+    }
+
+    true
+  }
+
+  fn genturfahi(lujvo: &str) -> Vec<Self> {
+    if lujvo.len() == 0 {
+      return vec![Self::kunti()];
+    }
+
+    let mut teryruhe = vec![];
+
+    for rafsi in Rafsi::genturfahi_bavlahi(lujvo) {
+      let velvihu = &lujvo[rafsi.selpormei()..];
+      for mut lerpoi in Self::genturfahi(velvihu) {
+        lerpoi.stedu_setca(rafsi.clone());
+        teryruhe.push(lerpoi);
+      }
+    }
+
+    teryruhe.into_iter().filter(|x| x.jvasahe()).collect()
+  }
+
+  fn vlaste_sisku(&self, vlaste: &Vlacku) -> Vec<Option<Valsi>> {
+    self.0.iter().map(|x| x.vlaste_sisku(vlaste)).collect()
   }
 }
 
@@ -144,147 +354,13 @@ struct Rafsi {
 
 impl ToString for Rafsi {
   fn to_string(&self) -> String {
-    self.rafsi.clone()
-  }
-}
-
-fn katna_lujvo(lujvo: &str) -> Option<Vec<Rafsi>> {
-  match lujvo.len() {
-    0 => return Some(vec![]),
-    1 | 2 => return None,
-    _ => (),
-  }
-
-  if lujvo.len() == 5 {
-    return jorne(gismu_zvafahi(lujvo), &lujvo[5..]);
-  }
-  if lujvo.len() == 3 || lujvo.len() == 4 {
-    if let Some(rafsi) = rafsi_zvafahi(lujvo) {
-      let len = rafsi.klesi.len();
-      return jorne(Some(rafsi), &lujvo[len..]);
-    } else {
-      return None;
-    }
-  }
-
-  // lu [gerny]tci li'u mu'a
-  if let Some(rafsi) = brarafsi_zvafahi(lujvo) {
-    return jorne(Some(rafsi), &lujvo[5..]);
-  }
-
-  // lu [loby]bau li'u mu'a
-  if let Some(rafsi) = rafsi_ceho_terjonlehu_zvafahi(lujvo) {
-    return jorne(Some(rafsi), &lujvo[4..]);
-  }
-
-  // lu [jbo]bau li'u mu'a
-  if let Some(rafsi) = rafsi_zvafahi(lujvo) {
-    let len = rafsi.klesi.len();
-    return jorne(Some(rafsi), &lujvo[len..]);
-  }
-
-  return None;
-}
-
-fn gismu_zvafahi(lujvo: &str) -> Option<Rafsi> {
-  gismu_klesi(&lujvo[0..5]).map(|gimlei| Rafsi {
-    klesi: Raflei::Gismu(gimlei),
-    rafsi: (&lujvo[0..5]).into(),
-    terjonlehu: None,
-  })
-}
-
-fn rafsi_zvafahi(lujvo: &str) -> Option<Rafsi> {
-  if let Some(klesi) = rafsi_klesi(&lujvo[0..3]) {
-    return Some(Rafsi {
-      klesi,
-      rafsi: (&lujvo[0..3]).into(),
-      terjonlehu: None,
-    });
-  }
-
-  if let Some(klesi) = rafsi_klesi(&lujvo[0..4]) {
-    return Some(Rafsi {
-      klesi,
-      rafsi: (&lujvo[0..4]).into(),
-      terjonlehu: None,
-    });
-  }
-
-  return None;
-}
-
-fn brarafsi_zvafahi(lujvo: &str) -> Option<Rafsi> {
-  if lujvo.chars().nth(4).unwrap() != 'y' {
-    return None;
-  }
-
-  gismu_klesi(&format!("{}{}", &lujvo[0..4], 'a')).map(|_| {
-    return Rafsi {
-      klesi: Raflei::Brarafsi,
-      rafsi: (&lujvo[0..4]).into(),
-      terjonlehu: Some('y'),
+    let terjonlehu = match self.terjonlehu {
+      Some(c) => format!("{}", c),
+      _ => "".to_string(),
     };
-  })
-}
 
-fn rafsi_ceho_terjonlehu_zvafahi(lujvo: &str) -> Option<Rafsi> {
-  use Raflei::*;
-
-  let terjonlehu = lujvo.chars().nth(3).unwrap();
-
-  match terjonlehu {
-    'r' | 'y' | 'n' => (),
-    _ => return None,
-  };
-
-  let seltau = &lujvo[0..3];
-  let tertau = &lujvo[4..7.min(lujvo.len())];
-  let drata_tertau = &lujvo[4..8.min(lujvo.len())]; // lu famy[ma'o] li'u mu'a
-
-  let seltau_klesi = rafsi_klesi(seltau)?;
-  let tertau_klesi = rafsi_klesi(tertau).or(rafsi_klesi(drata_tertau))?;
-
-  if terjonlehu == 'y' {
-    let pa = seltau.chars().nth(2).unwrap();
-    let re = tertau.chars().nth(0).unwrap();
-    if seltau_klesi == CVC && !CURMI_ZUNSNA_REMEI.contains(&(pa, re)) {
-      return Some(Rafsi {
-        klesi: seltau_klesi,
-        rafsi: (&lujvo[0..3]).into(),
-        terjonlehu: Some('y'),
-      });
-    } else {
-      return None;
-    }
+    format!("{}{}", self.rafsi, terjonlehu)
   }
-
-  if terjonlehu == 'n' && tertau.chars().nth(0).unwrap() != 'r' {
-    return None;
-  }
-
-  // lo tanru poi zilzba re pagbu
-  if lujvo.len() == 7 {
-    if seltau_klesi == CVV && tertau_klesi != CCV {
-      return Some(Rafsi {
-        klesi: seltau_klesi,
-        rafsi: (&lujvo[0..3]).into(),
-        terjonlehu: Some(terjonlehu),
-      });
-    } else {
-      return None;
-    }
-  }
-
-  if seltau_klesi == CVV {
-    return Some(Rafsi {
-      klesi: seltau_klesi,
-      rafsi: (&lujvo[0..3]).into(),
-      terjonlehu: Some(terjonlehu),
-    });
-  }
-
-  return None;
 }
 
 const CURMI_ZUNSNA_REMEI: &'static [(char, char)] = &[
@@ -338,48 +414,6 @@ const CURMI_ZUNSNA_REMEI: &'static [(char, char)] = &[
   ('x', 'r'),
 ];
 
-fn jorne(rafsi: Option<Rafsi>, selyliha: &str) -> Option<Vec<Rafsi>> {
-  if rafsi.is_none() {
-    return None;
-  }
-
-  if let Some(mut selyliha_rafsi) = katna_lujvo(selyliha) {
-    selyliha_rafsi.insert(0, rafsi.unwrap());
-    Some(selyliha_rafsi)
-  } else {
-    None
-  }
-}
-
-fn gismu_klesi(gismu: &str) -> Option<Gimlei> {
-  use Gimlei::*;
-  if gismu.len() != 5 {
-    return None;
-  }
-
-  match lerfu_sanse(gismu).as_str() {
-    "CVCCV" => Some(CVCCV),
-    "CCVCV" => Some(CCVCV),
-    _ => None,
-  }
-}
-
-fn rafsi_klesi(rafsi: &str) -> Option<Raflei> {
-  use Raflei::*;
-
-  if rafsi.len() != 3 && rafsi.len() != 4 {
-    return None;
-  }
-
-  match lerfu_sanse(rafsi).as_str() {
-    "CVC" => Some(CVC),
-    "CCV" => Some(CCV),
-    "CV'V" => Some(CVhV),
-    "CVV" => Some(CVV),
-    _ => None,
-  }
-}
-
 fn lerfu_sanse(valsi: &str) -> String {
   let mut teryruhe = String::new();
   for lerfu in valsi.to_lowercase().chars() {
@@ -387,7 +421,7 @@ fn lerfu_sanse(valsi: &str) -> String {
       teryruhe.push('V');
       continue;
     }
-    if lerfu.is_ascii_alphabetic() {
+    if let Some(_) = "bcdfgjklmnprstvxz".find(lerfu) {
       teryruhe.push('C');
       continue;
     }
@@ -402,28 +436,38 @@ mod tests {
 
   #[test]
   fn cipra_katna_lujvo() {
-    xusra_katna("saicli", "sai/cli");
     xusra_katna("saiclire", "sai/clire");
+    xusra_katna("saicli", "sai/cli");
     xusra_katna("sanmycli", "sanmy/cli");
     xusra_katna("sanmycilre", "sanmy/cilre");
     xusra_katna("zvaju'o", "zva/ju'o");
     xusra_katna("ju'ozva", "ju'o/zva");
-    xusra_katna("ju'ozva", "ju'o/zva");
     xusra_katna("cmeterge'a", "cme/ter/ge'a");
 
     xusra_katna("famyma'o", "famy/ma'o");
+    xusra_katna("mitysisku", "mity/sisku");
 
-    assert!(katna_lujvo("saiycli").is_none());
-    assert!(katna_lujvo("saircli").is_none());
-    assert!(katna_lujvo("saincli").is_none());
+    xusra_naljvasahe("saiycli");
+    xusra_naljvasahe("saircli");
+    xusra_naljvasahe("saincli");
   }
 
+  fn xusra_naljvasahe(lujvo: &str) {
+    assert!(Rafpoi::genturfahi(lujvo).as_slice().len() == 0)
+  }
   fn xusra_katna(lujvo: &str, lei_rafsi: &str) {
-    if let Some(teryruhe) = katna_lujvo(lujvo) {
-      let teryruhe_rafsi: Vec<_> =
-        teryruhe.into_iter().map(|x| x.rafsi).collect();
-      assert_eq!(teryruhe_rafsi.as_slice().join("/"), lei_rafsi);
+    if let [rafpoi] = Rafpoi::genturfahi(lujvo).as_slice() {
+      assert_eq!(
+        rafpoi.cpacu().iter().map(|x| x.to_string()).join("/"),
+        lei_rafsi
+      );
     } else {
+      println!(
+        "{} => {}, got: {:?}",
+        lujvo,
+        lei_rafsi,
+        Rafpoi::genturfahi(lujvo)
+      );
       assert!(false)
     }
   }
