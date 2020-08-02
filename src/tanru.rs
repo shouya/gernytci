@@ -264,25 +264,13 @@ impl Rafpoi {
     self.0 = [vec![rafsi], self.0.clone()].concat();
   }
 
-  fn jvasahe(&self) -> bool {
+  fn pagbu_jvasahe(&self) -> bool {
     use Raflei::*;
 
     let porsi = &self.0;
 
     if porsi.len() <= 1 {
       return true;
-    }
-
-    // no sumti cu naku ka'e zvati da'a lo mulfa'o
-    let (romoi, loi_drata) = porsi.as_slice().split_last().unwrap();
-    for rafsi in loi_drata {
-      if let Gismu(_) = rafsi.klesi {
-        return false;
-      }
-    }
-
-    if let Some(_) = romoi.terjonlehu {
-      return false;
     }
 
     // cipcta lo du'u loi rafsi remei ku jo'u lo terjonle'u cu sarxe
@@ -315,7 +303,40 @@ impl Rafpoi {
     true
   }
 
+  fn jvasahe(&self) -> bool {
+    use Raflei::*;
+
+    if !self.pagbu_jvasahe() {
+      return false;
+    }
+
+    if self.0.len() < 2 {
+      return false;
+    }
+
+    // no sumti cu naku ka'e zvati da'a lo mulfa'o
+    let (romoi, loi_drata) = self.0.as_slice().split_last().unwrap();
+    for rafsi in loi_drata {
+      if let Gismu(_) = rafsi.klesi {
+        return false;
+      }
+    }
+
+    if let Some(_) = romoi.terjonlehu {
+      return false;
+    }
+
+    true
+  }
+
   fn genturfahi(lujvo: &str) -> Vec<Self> {
+    Self::pagbu_genturfahi(lujvo)
+      .into_iter()
+      .filter(|x| x.jvasahe())
+      .collect()
+  }
+
+  fn pagbu_genturfahi(lujvo: &str) -> Vec<Self> {
     if lujvo.len() == 0 {
       return vec![Self::kunti()];
     }
@@ -324,13 +345,13 @@ impl Rafpoi {
 
     for rafsi in Rafsi::genturfahi_bavlahi(lujvo) {
       let velvihu = &lujvo[rafsi.selpormei()..];
-      for mut lerpoi in Self::genturfahi(velvihu) {
+      for mut lerpoi in Self::pagbu_genturfahi(velvihu) {
         lerpoi.stedu_setca(rafsi.clone());
         teryruhe.push(lerpoi);
       }
     }
 
-    teryruhe.into_iter().filter(|x| x.jvasahe()).collect()
+    teryruhe.into_iter().filter(|x| x.pagbu_jvasahe()).collect()
   }
 
   fn vlaste_sisku(&self, vlaste: &Vlacku) -> Vec<Option<Valsi>> {
@@ -450,6 +471,11 @@ mod tests {
     xusra_naljvasahe("saiycli");
     xusra_naljvasahe("saircli");
     xusra_naljvasahe("saincli");
+
+    xusra_naljvasahe("barda");
+    xusra_naljvasahe("dit");
+    xusra_naljvasahe("dity");
+    xusra_naljvasahe("skamiskami");
   }
 
   fn xusra_naljvasahe(lujvo: &str) {
