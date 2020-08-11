@@ -20,7 +20,9 @@ pub struct Rafpoi(Vec<Rafsi>);
 pub struct Teryruhe {
   rafsi: Rafpoi,
   tanru: Vec<Option<Valsi>>,
+
 }
+
 
 impl crate::TciTeryruhe for Teryruhe {
   fn termontai_lo_vlamei(&self) {
@@ -135,6 +137,11 @@ impl Raflei {
     cumki
   }
 
+  fn xu_tamsmi_cyvyvy(&self) -> bool {
+    use Raflei::*;
+    *self == CVV || *self == CVhV
+  }
+
   fn mapti(rafsi: &str) -> Option<Raflei> {
     use Gimlei::*;
     use Raflei::*;
@@ -214,9 +221,9 @@ impl Rafsi {
 
     if terjonlehu == 'y' && klesi == CVC {
       true
-    } else if terjonlehu == 'r' && klesi == CVV {
+    } else if terjonlehu == 'r' && klesi.xu_tamsmi_cyvyvy() {
       true
-    } else if terjonlehu == 'n' && klesi == CVV {
+    } else if terjonlehu == 'n' && klesi.xu_tamsmi_cyvyvy() {
       true
     } else {
       false
@@ -294,7 +301,7 @@ impl Rafpoi {
           return false;
         }
 
-        if seltau.klesi != CVV || tertau.klesi == CCV {
+        if !seltau.klesi.xu_tamsmi_cyvyvy() || tertau.klesi == CCV {
           return false;
         }
       }
@@ -467,6 +474,9 @@ mod tests {
 
     xusra_katna("famyma'o", "famy/ma'o");
     xusra_katna("mitysisku", "mity/sisku");
+
+    xusra_katna("ba'urdjica", "ba'ur/djica");
+    xusra_katna("ba'urdu'u", "ba'ur/du'u");
 
     xusra_naljvasahe("saiycli");
     xusra_naljvasahe("saircli");
