@@ -3,10 +3,13 @@ name: gernytci
 args:
   - official-only:
       short: "o"
-      help: "Only search official data"
-  - dictionary:
+      long: "official-only"
+      help: "Only entries from @official_data only"
+  - dict:
       short: "d"
+      long: "dict"
       value_name: "dict"
+      default_value: "[built-in]"
       help: "Specify custom dictionary"
   - format:
       short: "f"
