@@ -1,110 +1,24 @@
-use std::path::PathBuf;
+use anyhow::Error;
+use clap::{load_yaml, App, ArgMatches};
 
-use structopt::StructOpt;
+mod tutci;
+mod vanbi;
 
-// lei tutci
-mod bixygau; // bixygau fi lo vlacku sfaile
-mod tamsmi; // zvafa'i loi simsa valsi lo ka tarmi
-mod zvafahi; // zvafa'i da poi mapti lo se sisku
-mod tanru;
+use vanbi::Vanbi;
 
-mod kampu;
-mod sidju;
-mod vlacku;
+fn main() -> Result<(), Error> {
+  use tutci::*;
 
-use kampu::*;
+  let lahe_la_yaml = load_yaml!("../cli.yaml");
+  let mut tercuha = App::from(lahe_la_yaml);
+  let selcuha = tercuha.clone().get_matches();
 
-#[derive(StructOpt)]
-pub struct Tergalfi {
-  #[structopt(
-    name = "format",
-    short,
-    long,
-    default_value = "text",
-    help = "Output colored \"text\" or machine-readble \"json\""
-  )]
-  termontai: Termonai,
+  let vanbi = Vanbi::new(&selcuha);
 
-  #[structopt(
-    name = "dict",
-    short,
-    long,
-    parse(from_os_str),
-    help = "Location to dict file",
-    default_value = "[built-in]"
-  )]
-  vlacku: PathBuf,
-
-  #[structopt(
-    name = "offcial-only",
-    help = "Use entries from @official_data only",
-    short,
-    long
-  )]
-  catni_poho: bool,
-
-  #[structopt(subcommand)]
-  minde: Minde,
-}
-
-#[derive(Clone, Copy)]
-pub enum Termonai {
-  Text,
-  Json,
-}
-
-impl std::str::FromStr for Termonai {
-  type Err = Error;
-  fn from_str(s: &str) -> Result<Self> {
-    match s {
-      "json" => Ok(Self::Json),
-      "text" => Ok(Self::Text),
-      _ => Err(anyhow!("only 'json' or 'text' is allowed")),
-    }
-  }
-}
-
-trait TciTeryruhe {
-  fn termontai_lo_vlamei(&self);
-  fn termontai_lahe_jeison(&self);
-
-  fn ciska(&self, termontai: Termonai) {
-    match termontai {
-      Termonai::Text => self.termontai_lo_vlamei(),
-      Termonai::Json => self.termontai_lahe_jeison(),
-    }
-  }
-}
-
-#[derive(StructOpt)]
-#[structopt()]
-pub enum Minde {
-  Tamsmi(tamsmi::Tergalfi),
-  Bixygau(bixygau::Tergalfi),
-  Zvafahi(zvafahi::Tergalfi),
-  Tanru(tanru::Tergalfi)
-}
-
-fn main() -> Result<()> {
-  let tergalfi = Tergalfi::from_args();
-  let mut vlacku = vlacku::Vlacku::tolsorcu(&tergalfi.vlacku)?;
-
-  if tergalfi.catni_poho {
-    vlacku.catni_poho();
-  }
-
-  match &tergalfi.minde {
-    Minde::Tamsmi(_) => {
-      tamsmi::tamsmi(&tergalfi, &vlacku)?.ciska(tergalfi.termontai)
-    }
-    Minde::Bixygau(_) => {
-      bixygau::bixygau(&tergalfi, &mut vlacku)?.ciska(tergalfi.termontai)
-    }
-    Minde::Zvafahi(_) => {
-      zvafahi::zvafahi(&tergalfi, &vlacku)?.ciska(tergalfi.termontai)
-    }
-    Minde::Tanru(_) => {
-      tanru::tanru(&tergalfi, &vlacku)?.ciska(tergalfi.termontai)
+  match selcuha.subcommand() {
+    ("coi", Some(mapti)) => coi::pruce(mapti, &vanbi),
+    _ => {
+      tercuha.print_help()?;
     }
   }
 

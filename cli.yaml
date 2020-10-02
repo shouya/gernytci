@@ -1,0 +1,24 @@
+name: gernytci
+
+args:
+  - official-only:
+      short: "o"
+      help: "Only search official data"
+  - dictionary:
+      short: "d"
+      value_name: "dict"
+      help: "Specify custom dictionary"
+  - format:
+      short: "f"
+      help: "Output format"
+      possible_values:
+        - json
+        - text
+
+subcommands:
+  - coi:
+      about: demonstration purpose only
+      args:
+        - coho:
+            help: "op"
+            short: "o"
