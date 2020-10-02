@@ -43,3 +43,14 @@ subcommands:
             help: "Keyword(s) to search for"
             multiple: true
             required: true
+
+  - tamsmi:
+      about: Search words resembling in shape
+      args:
+        - count:
+            short: "c"
+            default_value: "5"
+            help: "Number of results to return"
+        - word:
+            help: "Reference word"
+            required: true

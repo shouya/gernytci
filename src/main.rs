@@ -6,10 +6,11 @@ mod sidju;
 mod tutci;
 mod vanbi;
 mod vlacku;
+mod kampu;
 
-use reltai::Reltai;
-use vanbi::Vanbi;
-use vlacku::Valsi;
+pub use reltai::Reltai;
+pub use vanbi::Vanbi;
+pub use vlacku::Valsi;
 
 fn main() -> Result<(), Error> {
   use tutci::*;
@@ -23,6 +24,7 @@ fn main() -> Result<(), Error> {
   match kampu_selcuha.subcommand() {
     ("hello", Some(selcuha)) => coi::pruce(selcuha, &vanbi),
     ("search", Some(selcuha)) => zvafahi::pruce(selcuha, &vanbi),
+    ("tamsmi", Some(selcuha)) => tamsmi::pruce(selcuha, &vanbi),
     _ => {
       println!("Invalid command!\n");
       tercuha.print_help()?;
