@@ -19,12 +19,12 @@ impl<'a> Vanbi<'a> {
     }
   }
 
-  pub fn cpacu_vlacku(&self) -> impl Deref<Target = Vlacku> + '_ {
+  pub fn vlacku(&self) -> impl Deref<Target = Vlacku> + '_ {
     match &mut *self.vlacku.borrow_mut() {
       Some(_vlacku) => (),
       judri => {
         let selcuha = self.tcekau_selcuha;
-        let sfaile = PathBuf::from(selcuha.value_of("dictionary").unwrap());
+        let sfaile = PathBuf::from(selcuha.value_of("dict").unwrap());
         let mut vlacku =
           Vlacku::tolsorcu(&sfaile).expect("Failed to load dictionary");
 
