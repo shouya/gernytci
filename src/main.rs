@@ -1,10 +1,10 @@
 use anyhow::Error;
 use clap::{load_yaml, App};
 
+mod sidju;
 mod tutci;
 mod vanbi;
 mod vlacku;
-mod sidju;
 
 use vanbi::Vanbi;
 
@@ -18,9 +18,11 @@ fn main() -> Result<(), Error> {
   let vanbi = Vanbi::new(&selcuha);
 
   match selcuha.subcommand() {
-    ("coi", Some(mapti)) => coi::pruce(mapti, &vanbi),
+    ("hello", Some(mapti)) => coi::pruce(mapti, &vanbi),
     _ => {
+      println!("Invalid command!\n");
       tercuha.print_help()?;
+      println!("")
     }
   }
 

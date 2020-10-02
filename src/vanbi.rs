@@ -1,41 +1,42 @@
-use std::cell::{Ref, RefCell};
+use std::cell::{RefCell, RefMut};
 use std::ops::Deref;
 use std::path::PathBuf;
+use std::convert::TryFrom;
 
 use clap::ArgMatches;
 
-use crate::vlacku::Vlacku;
+use crate::vlacku::{LazniVlacku, Vlacku};
 
-pub struct Vanbi<'a> {
-  tcekau_selcuha: &'a ArgMatches<'a>,
-  vlacku: RefCell<Option<Vlacku>>,
+enum PrinaTarmi {
+  Json,
+  Text,
 }
 
-impl<'a> Vanbi<'a> {
-  pub fn new(selcuha: &'a ArgMatches<'a>) -> Self {
+impl From<&ArgMatches<'_>> for PrinaTarmi {
+  fn from(selcuha: &ArgMatches<'_>) -> Self {
+    match selcuha.value_of("format") {
+      Some("json") => PrinaTarmi::Json,
+      Some("text") => PrinaTarmi::Text,
+      _ => panic!("Invalid output format"),
+    }
+  }
+}
+
+pub struct Vanbi {
+  prina_tarmi: PrinaTarmi,
+  vlacku: RefCell<LazniVlacku>,
+}
+
+impl Vanbi {
+  pub fn new(selcuha: &ArgMatches<'_>) -> Self {
     Vanbi {
-      tcekau_selcuha: selcuha,
-      vlacku: RefCell::new(None as Option<Vlacku>),
+      prina_tarmi: PrinaTarmi::from(selcuha),
+      vlacku: RefCell::new(LazniVlacku::try_from(selcuha).unwrap()),
     }
   }
 
   pub fn vlacku(&self) -> impl Deref<Target = Vlacku> + '_ {
-    match &mut *self.vlacku.borrow_mut() {
-      Some(_vlacku) => (),
-      judri => {
-        let selcuha = self.tcekau_selcuha;
-        let sfaile = PathBuf::from(selcuha.value_of("dict").unwrap());
-        let mut vlacku =
-          Vlacku::tolsorcu(&sfaile).expect("Failed to load dictionary");
-
-        if selcuha.is_present("official-only") {
-          vlacku.catni_poho()
-        }
-
-        judri.replace(vlacku);
-      }
-    }
-
-    Ref::map(self.vlacku.borrow(), |x| x.as_ref().unwrap())
+    let judri = self.vlacku.borrow_mut();
+    RefMut::map(judri, |x| x.cpacu().expect("Failed to load dictionary"))
   }
 }

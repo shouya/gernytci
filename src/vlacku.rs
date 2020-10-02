@@ -1,12 +1,14 @@
 use std::cell::RefCell;
 use std::collections::BTreeMap;
+use std::convert::TryFrom;
 use std::path::{Path, PathBuf};
 
 use crate::sidju;
 
+use anyhow::{anyhow, Result};
+use clap::ArgMatches;
 use serde::{Deserialize, Serialize};
 use simd_json;
-use anyhow::Result;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Valsi {
@@ -31,7 +33,55 @@ impl Valsi {
       "rafsi" => None,
       "krasi" => Some(self.krasi.clone()),
       "pinka" => self.pinka.clone(),
-      _ => None
+      _ => None,
+    }
+  }
+}
+
+#[derive(Debug)]
+pub enum LazniVlacku {
+  Uonai { catni_poho: bool, sfaile: PathBuf },
+  Uo(Vlacku),
+}
+
+impl TryFrom<&ArgMatches<'_>> for LazniVlacku {
+  type Error = anyhow::Error;
+
+  fn try_from(selcuha: &ArgMatches<'_>) -> Result<LazniVlacku> {
+    let sfaile: PathBuf = selcuha
+      .value_of("dict")
+      .ok_or(anyhow!("Dictionary not specified"))?
+      .into();
+    let catni_poho = selcuha.is_present("official-only");
+
+    Ok(LazniVlacku::Uonai { catni_poho, sfaile })
+  }
+}
+
+impl LazniVlacku {
+  fn tolsorcu(&mut self) -> Result<()> {
+    use LazniVlacku::{Uo, Uonai};
+    match self {
+      Uo(_) => (),
+      Uonai { catni_poho, sfaile } => {
+        let mut vlacku = Vlacku::tolsorcu(&sfaile)?;
+        if *catni_poho {
+          vlacku.catni_poho()
+        }
+
+        *self = Uo(vlacku);
+        ()
+      }
+    }
+
+    Ok(())
+  }
+
+  pub fn cpacu(&mut self) -> Result<&mut Vlacku> {
+    self.tolsorcu()?;
+    match self {
+      Self::Uo(vlacku) => Ok(vlacku),
+      _ => Err(anyhow!("Failed to load dictionary!")),
     }
   }
 }
@@ -58,7 +108,7 @@ impl Vlacku {
     Ok(Self {
       sorcu: sorcu,
       pluta: pluta.into(),
-      indice: RefCell::new(None)
+      indice: RefCell::new(None),
     })
   }
 

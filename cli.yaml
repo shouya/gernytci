@@ -14,14 +14,30 @@ args:
   - format:
       short: "f"
       help: "Output format"
+      default_value: "text"
       possible_values:
         - json
         - text
 
 subcommands:
-  - coi:
-      about: demonstration purpose only
+  - hello:
+      aliases:
+        - coi
+      about: Greetings!
       args:
-        - coho:
-            help: "op"
-            short: "o"
+        - goodbye:
+            help: "Good bye"
+            short: "b"
+        - target: {}
+
+  - search:
+      about: Search in dictionary
+      aliases:
+        - sisku
+      args:
+        - count:
+            short: "c"
+            help: "Number of results to return"
+        - keyword:
+            help: "Keyword(s) to search for"
+            multiple: true
