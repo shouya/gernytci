@@ -37,7 +37,9 @@ subcommands:
       args:
         - count:
             short: "c"
+            default_value: "5"
             help: "Number of results to return"
         - keyword:
             help: "Keyword(s) to search for"
             multiple: true
+            required: true

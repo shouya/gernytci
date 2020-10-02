@@ -1,13 +1,12 @@
 use std::cell::{RefCell, RefMut};
-use std::ops::Deref;
-use std::path::PathBuf;
 use std::convert::TryFrom;
+use std::ops::Deref;
 
 use clap::ArgMatches;
 
 use crate::vlacku::{LazniVlacku, Vlacku};
 
-enum PrinaTarmi {
+pub enum PrinaTarmi {
   Json,
   Text,
 }
@@ -23,7 +22,7 @@ impl From<&ArgMatches<'_>> for PrinaTarmi {
 }
 
 pub struct Vanbi {
-  prina_tarmi: PrinaTarmi,
+  pub prina_tarmi: PrinaTarmi,
   vlacku: RefCell<LazniVlacku>,
 }
 
