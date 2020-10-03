@@ -3,8 +3,8 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-use flate2::read::GzDecoder;
 use anyhow::Result;
+use flate2::read::GzDecoder;
 
 pub fn tolsorcu_sfaile(pluta: &Path) -> Result<String> {
   let mut xadni = String::new();

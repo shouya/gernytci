@@ -2,10 +2,11 @@ use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 
 use crate::sidju;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 use clap::ArgMatches;
 use serde::{Deserialize, Serialize};
 use simd_json;
@@ -41,7 +42,7 @@ impl Valsi {
 #[derive(Debug)]
 pub enum LazniVlacku {
   Uonai { catni_poho: bool, sfaile: PathBuf },
-  Uo(Vlacku),
+  Uo(Rc<Vlacku>),
 }
 
 impl TryFrom<&ArgMatches<'_>> for LazniVlacku {
@@ -69,7 +70,7 @@ impl LazniVlacku {
           vlacku.catni_poho()
         }
 
-        *self = Uo(vlacku);
+        *self = Uo(Rc::new(vlacku));
         ()
       }
     }
@@ -77,16 +78,20 @@ impl LazniVlacku {
     Ok(())
   }
 
-  pub fn cpacu(&mut self) -> Result<&mut Vlacku> {
+  pub fn cpacu(&mut self) -> Result<Rc<Vlacku>> {
     self.tolsorcu()?;
+    self.cpacu_culno()
+  }
+
+  pub fn cpacu_culno(&self) -> Result<Rc<Vlacku>> {
     match self {
-      Self::Uo(vlacku) => Ok(vlacku),
-      _ => Err(anyhow!("Failed to load dictionary!")),
+      Self::Uo(vlacku) => Ok(vlacku.clone()),
+      _ => bail!("Failed to load dictionary!"),
     }
   }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Vlacku {
   pub sorcu: Vec<Valsi>,
   pub pluta: PathBuf,

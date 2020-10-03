@@ -1,10 +1,8 @@
 use std::collections::HashMap;
 
-use clap::{value_t, values_t, ArgMatches};
 use colored::*;
-use serde::Serialize;
 
-use crate::{Reltai, Valsi, Vanbi};
+use crate::kampu::*;
 
 #[derive(Clone, Serialize, Debug)]
 struct Mapti {
@@ -21,7 +19,7 @@ pub struct Teryruhe {
   zvati: HashMap<&'static str, Vec<Valsi>>,
 }
 
-pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) {
+pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<impl Reltai> {
   let selsisku = values_t!(selruhe, "keyword", String).unwrap();
   let velvihu_klani = value_t!(selruhe, "count", usize).unwrap();
   let morna = zbasu_morna(selsisku.as_slice());
@@ -31,7 +29,7 @@ pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) {
     zvati.insert(ckaji, Vec::new());
   }
 
-  for valsi in vanbi.vlacku().sorcu.iter() {
+  for valsi in vanbi.vlacku()?.sorcu.iter() {
     for ckaji in RO_CKAJI {
       let vlamei = valsi.cpacu(ckaji).unwrap_or("".into());
       let mat = mapti(&morna, &vlamei);
@@ -60,7 +58,7 @@ pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) {
     zvati: zvati,
   };
 
-  teryruhe.prina(vanbi).ok();
+  Ok(teryruhe)
 }
 
 type Morna = Vec<(String, f32)>;

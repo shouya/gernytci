@@ -1,7 +1,8 @@
-use std::cell::{RefCell, RefMut};
+use std::cell::RefCell;
 use std::convert::TryFrom;
 use std::ops::Deref;
 
+use anyhow::Result;
 use clap::ArgMatches;
 
 use crate::vlacku::{LazniVlacku, Vlacku};
@@ -26,16 +27,19 @@ pub struct Vanbi {
   vlacku: RefCell<LazniVlacku>,
 }
 
-impl Vanbi {
-  pub fn new(selcuha: &ArgMatches<'_>) -> Self {
-    Vanbi {
-      prina_tarmi: PrinaTarmi::from(selcuha),
-      vlacku: RefCell::new(LazniVlacku::try_from(selcuha).unwrap()),
-    }
-  }
+impl TryFrom<&ArgMatches<'_>> for Vanbi {
+  type Error = anyhow::Error;
 
-  pub fn vlacku(&self) -> impl Deref<Target = Vlacku> + '_ {
-    let judri = self.vlacku.borrow_mut();
-    RefMut::map(judri, |x| x.cpacu().expect("Failed to load dictionary"))
+  fn try_from(selcuha: &ArgMatches<'_>) -> Result<Self> {
+    Ok(Vanbi {
+      prina_tarmi: PrinaTarmi::from(selcuha),
+      vlacku: RefCell::new(LazniVlacku::try_from(selcuha)?),
+    })
+  }
+}
+
+impl Vanbi {
+  pub fn vlacku(&self) -> Result<impl Deref<Target = Vlacku>> {
+    Ok(self.vlacku.borrow_mut().cpacu()?)
   }
 }

@@ -42,25 +42,24 @@ impl ToString for Teryruhe {
   }
 }
 
-pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) {
+pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<impl Reltai> {
   let selsisku = value_t!(selruhe, "word", String).unwrap();
   let velvihu_klani = value_t!(selruhe, "count", usize).unwrap();
 
   let mut indice = BinaryHeap::new();
 
-  for (xo, vla) in vanbi.vlacku().sorcu.iter().enumerate() {
+  for (xo, vla) in vanbi.vlacku()?.sorcu.iter().enumerate() {
     let kaicla = damerau_levenshtein(&vla.cmene, &selsisku) as i32;
     indice.push((-kaicla, xo))
   }
 
   let mut porsi = Vec::new();
-  for _ in 1..velvihu_klani {
+  for _ in 0..velvihu_klani {
     match indice.pop() {
-      Some((_, xo)) => porsi.push(vanbi.vlacku().sorcu[xo].clone()),
+      Some((_, xo)) => porsi.push(vanbi.vlacku()?.sorcu[xo].clone()),
       _ => (),
     }
   }
 
-  let teryruhe = Teryruhe { selsisku, porsi };
-  teryruhe.prina(vanbi).ok();
+  Ok(Teryruhe { selsisku, porsi })
 }
