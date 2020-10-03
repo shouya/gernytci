@@ -12,7 +12,7 @@ mod vlacku;
 
 pub use reltai::Reltai;
 pub use vanbi::Vanbi;
-pub use vlacku::Valsi;
+pub use vlacku::{Valsi, Vlacku};
 
 fn main() -> Result<(), Error> {
   use tutci::*;
@@ -29,6 +29,7 @@ fn main() -> Result<(), Error> {
     "hello" => coi::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     "search" => zvafahi::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     "tamsmi" => tamsmi::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
+    "cut" => katna::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     _ => panic!("unreachable"),
   };
 
