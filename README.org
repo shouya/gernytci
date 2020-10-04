@@ -14,25 +14,26 @@ cargo install --path gernytci
 ** Help
 
 #+BEGIN_SRC bash
-gernytci 0.1.0
+gernytci
 
 USAGE:
     gernytci [FLAGS] [OPTIONS] <SUBCOMMAND>
 
 FLAGS:
-    -h, --help            Prints help information
-    -o, --offcial-only    Use entries from @official_data only
-    -V, --version         Prints version information
+    -h, --help             Prints help information
+    -o, --official-only    Only entries from @official_data
+    -V, --version          Prints version information
 
 OPTIONS:
-    -d, --dict <dict>        Location to dict file [default: [built-in]]
-    -f, --format <format>    Output colored "text" or machine-readble "json" [default: text]
+    -d, --dict <dict>    Specify custom dictionary [default: [built-in]]
+    -f <format>          Output format [default: text]  [possible values: json, text]
 
 SUBCOMMANDS:
-    bixygau    Convert xml dump from jbovlaste
+    convert    Convert xml dump from jbovlaste (dict needs to be writable)
+    cut        Decompose lujvo into tanru
     help       Prints this message or the help of the given subcommand(s)
-    tamsmi     Find words similar in shape
-    zvafahi    Lookup dictionary
+    search     Search in dictionary
+    tamsmi     Search words resembling in shape
 #+END_SRC
 
 You can checkout the usage of each subcommand via =gernytci help <subcommand>=.
@@ -42,40 +43,14 @@ You can checkout the usage of each subcommand via =gernytci help <subcommand>=.
 Planned features:
 
 - [X] tamsmi - find similar word in shape
-- [X] bixygau - convert jbovlaste dump file
-- [X] zvafahi - dictionary lookup
-- [X] tanru - lujvo decomposing tool
-- [ ] lujvo making tool
-- [ ] beta grammar checker (camxes)
-- [ ] BAI <=> gismu lookup
-- [ ] [[https://tatoeba.org/jbo/][Tatoeba]] search
+- [X] convert - convert jbovlaste dump file
+- [X] search - search keyword in dictionary
+- [X] cut - lujvo decomposing tool
+- [ ] lujvo - lujvo making tool
+- [ ] grammar - beta grammar checker (camxes)
+- [ ] bai - BAI <=> gismu lookup
+- [ ] example - [[https://tatoeba.org/jbo/][Tatoeba]] search
 - [ ] more...
-
-*** tamsmi (find similar words)
-
-#+CAPTION: Screenshot of a demo usage for "tamsmi"
-#+NAME:   fig:tamsmi_vidnyxra
-[[https://user-images.githubusercontent.com/526598/82159790-722fc780-98c3-11ea-9058-ff92cdf08cad.png]]
-
-*** zvafahi (lookup in dictionary)
-
-#+CAPTION: Screenshot of a demo usage for "zvafahi"
-#+NAME:   fig:zvafahi_vidnyxra
-[[https://user-images.githubusercontent.com/526598/82159822-af945500-98c3-11ea-8b00-2394b79892f2.png]]
-
-*** bixygau (convert jbovlaste XML dump to json)
-
-You generally don't need this, as this tool has built-in dictionary
-(jbo-en) included in the binary. If you want to customize or use the
-dictionary for other languages, you can use this tool.
-
-Instructions:
-
-1. Download the export from [[http://jbovlaste.lojban.org/export/xml.html][here]].
-2. Run =gerytci -d <output_filename> <input_xml_filename>=; Note that
-   You must specify =-d= option the output location of the generated
-   dict file.
-3. Wait until it finishes. The generation process will take a few minutes.
 
 ** Copyright
 
