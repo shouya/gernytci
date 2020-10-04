@@ -29,7 +29,7 @@ pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<impl Reltai> {
     zvati.insert(ckaji, Vec::new());
   }
 
-  for valsi in vanbi.vlacku()?.sorcu.iter() {
+  for valsi in vanbi.vlacku()?.iter() {
     for ckaji in RO_CKAJI {
       let vlamei = valsi.cpacu(ckaji).unwrap_or("".into());
       let mat = mapti(&morna, &vlamei);

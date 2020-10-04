@@ -48,18 +48,19 @@ pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<impl Reltai> {
 
   let mut indice = BinaryHeap::new();
 
-  for (xo, vla) in vanbi.vlacku()?.sorcu.iter().enumerate() {
-    let kaicla = damerau_levenshtein(&vla.cmene, &selsisku) as i32;
-    indice.push((-kaicla, xo))
-  }
-
-  let mut porsi = Vec::new();
-  for _ in 0..velvihu_klani {
-    match indice.pop() {
-      Some((_, xo)) => porsi.push(vanbi.vlacku()?.sorcu[xo].clone()),
-      _ => (),
+  for vla in vanbi.vlacku()?.iter() {
+    let nilsmi = damerau_levenshtein(&vla.cmene, &selsisku) as i32;
+    indice.push((nilsmi, vla.clone()));
+    if indice.len() > velvihu_klani {
+      indice.pop();
     }
   }
+
+  let porsi = indice
+    .into_sorted_vec()
+    .into_iter()
+    .map(|(_nilsmi, vla)| vla)
+    .collect();
 
   Ok(Teryruhe { selsisku, porsi })
 }

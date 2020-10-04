@@ -213,7 +213,7 @@ impl Rafsi {
   fn vlaste_sisku(&self, vlacku: &Vlacku) -> Option<Valsi> {
     use Raflei::*;
 
-    for valsi in &vlacku.sorcu {
+    for valsi in vlacku.iter() {
       let found = match self.klesi {
         Brarafsi => valsi.cmene.starts_with(&self.rafsi[0..4]),
         Gismu(_) => valsi.cmene == self.rafsi,

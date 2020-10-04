@@ -30,6 +30,7 @@ fn main() -> Result<(), Error> {
     "search" => zvafahi::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     "tamsmi" => tamsmi::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     "cut" => katna::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
+    "convert" => bixygau::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     _ => panic!("unreachable"),
   };
 

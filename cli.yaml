@@ -65,5 +65,17 @@ subcommands:
             help: "The lujvo to be cut"
             required: true
 
+  - convert:
+      aliases:
+        - bixygau
+      about: "Convert xml dump from jbovlaste (dict needs to be writable)"
+      args:
+        - from:
+            aliases:
+              - krasi
+            short: "f"
+            help: "Path of XML dump file"
+            required: true
+
 settings:
   - SubcommandRequiredElseHelp

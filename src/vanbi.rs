@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::convert::TryFrom;
 use std::ops::Deref;
+use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -41,5 +42,9 @@ impl TryFrom<&ArgMatches<'_>> for Vanbi {
 impl Vanbi {
   pub fn vlacku(&self) -> Result<impl Deref<Target = Vlacku>> {
     Ok(self.vlacku.borrow_mut().cpacu()?)
+  }
+
+  pub fn vlacku_sfaile(&self) -> PathBuf {
+    self.vlacku.borrow().sfaile().into()
   }
 }
