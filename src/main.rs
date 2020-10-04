@@ -9,6 +9,7 @@ mod sidju;
 mod tutci;
 mod vanbi;
 mod vlacku;
+mod gerna;
 
 pub use reltai::Reltai;
 pub use vanbi::Vanbi;
