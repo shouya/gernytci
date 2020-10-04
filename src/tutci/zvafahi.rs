@@ -1,27 +1,8 @@
 use std::collections::HashMap;
 
 use colored::*;
-use serde::Serialize;
-use structopt::StructOpt;
 
 use crate::kampu::*;
-use crate::vlacku::{Valsi, Vlacku};
-
-#[derive(Debug, StructOpt)]
-#[structopt(name = "zvafahi", about = "Lookup dictionary")]
-pub struct Tergalfi {
-  #[structopt(
-    name = "count",
-    short,
-    long,
-    help = "Number of results to return",
-    default_value = "5"
-  )]
-  klani: usize,
-
-  #[structopt(name = "text")]
-  selsisku: Vec<String>,
-}
 
 #[derive(Clone, Serialize, Debug)]
 struct Mapti {
@@ -38,21 +19,17 @@ pub struct Teryruhe {
   zvati: HashMap<&'static str, Vec<Valsi>>,
 }
 
-pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
-  use crate::Minde::Zvafahi;
-
-  let zvafahi_tergaf = match &tergaf.minde {
-    Zvafahi(da) => da,
-    _ => unreachable!(),
-  };
-  let morna = zbasu_morna(zvafahi_tergaf.selsisku.as_slice());
+pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<impl Reltai> {
+  let selsisku = values_t!(selruhe, "keyword", String).unwrap();
+  let velvihu_klani = value_t!(selruhe, "count", usize).unwrap();
+  let morna = zbasu_morna(selsisku.as_slice());
   let mut zvati: HashMap<&str, _> = HashMap::new();
 
   for ckaji in RO_CKAJI.iter() {
     zvati.insert(ckaji, Vec::new());
   }
 
-  for valsi in vlacku.sorcu.iter() {
+  for valsi in vanbi.vlacku()?.iter() {
     for ckaji in RO_CKAJI {
       let vlamei = valsi.cpacu(ckaji).unwrap_or("".into());
       let mat = mapti(&morna, &vlamei);
@@ -65,7 +42,7 @@ pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
 
   for liste in zvati.values_mut() {
     liste.sort_by(|da, de| de.1.vamji.partial_cmp(&da.1.vamji).unwrap());
-    liste.truncate(zvafahi_tergaf.klani);
+    liste.truncate(velvihu_klani);
   }
 
   let zvati = zvati
@@ -75,11 +52,13 @@ pub fn zvafahi(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
     })
     .collect();
 
-  Ok(Teryruhe {
-    selsisku: zvafahi_tergaf.selsisku.clone(),
+  let teryruhe = Teryruhe {
+    selsisku: selsisku,
     morna: morna,
     zvati: zvati,
-  })
+  };
+
+  Ok(teryruhe)
 }
 
 type Morna = Vec<(String, f32)>;
@@ -126,37 +105,40 @@ fn mapti(morna: &Morna, selzvati: &str) -> Mapti {
   Mapti { vamji, selkanpe }
 }
 
-impl crate::TciTeryruhe for Teryruhe {
-  fn termontai_lo_vlamei(&self) {
-    prina_pagbu("Word", &self.zvati["cmene"], &self.morna);
-    prina_pagbu("Gloss", &self.zvati["glosa"], &self.morna);
-    prina_pagbu("Definition", &self.zvati["smuni"], &self.morna);
-    prina_pagbu("Notes", &self.zvati["pinka"], &self.morna);
-  }
-  fn termontai_lahe_jeison(&self) {
-    println!("{}", serde_json::to_string(self).unwrap());
+impl ToString for Teryruhe {
+  fn to_string(&self) -> String {
+    let mut lerpoi = String::new();
+    lerpoi += &prina_pagbu("Word", &self.zvati["cmene"], &self.morna);
+    lerpoi += &prina_pagbu("Gloss", &self.zvati["glosa"], &self.morna);
+    lerpoi += &prina_pagbu("Definition", &self.zvati["smuni"], &self.morna);
+    lerpoi += &prina_pagbu("Notes", &self.zvati["pinka"], &self.morna);
+    lerpoi
   }
 }
 
-fn prina_pagbu(pagbu_cmene: &str, liste: &Vec<Valsi>, morna: &Morna) {
+fn prina_pagbu(pagbu_cmene: &str, liste: &Vec<Valsi>, morna: &Morna) -> String {
+  let mut lerpoi = String::new();
   if liste.len() == 0 {
-    return;
+    return lerpoi;
   }
 
-  println!(
+  lerpoi += &format!(
     "{} results matching {}",
     liste.len().to_string().blue(),
     pagbu_cmene.bold().blue()
   );
 
   for vla in liste {
-    prina_valsi(vla, morna);
+    lerpoi += &prina_valsi(vla, morna);
   }
 
-  println!("\n----\n")
+  lerpoi += "\n----\n";
+
+  lerpoi
 }
 
-fn prina_valsi(valsi: &Valsi, morna: &Morna) {
+fn prina_valsi(valsi: &Valsi, morna: &Morna) -> String {
+  let mut lerpoi = String::new();
   let rafsi_lerpoi = format!("-{}-", valsi.rafsi.join("-"));
   let rafsi_pagbu = if rafsi_lerpoi != "--" {
     format!("{} ", skagau_lerpoi(&rafsi_lerpoi, morna))
@@ -164,7 +146,7 @@ fn prina_valsi(valsi: &Valsi, morna: &Morna) {
     "".into()
   };
 
-  print!(
+  lerpoi += &format!(
     "\n{} {:35} ",
     "*".purple(),
     format!(
@@ -175,24 +157,26 @@ fn prina_valsi(valsi: &Valsi, morna: &Morna) {
   );
 
   if let Some(glosa) = &valsi.glosa {
-    print!("{:20} ", format!("{}", skagau_lerpoi(&glosa, morna).cyan()));
+    lerpoi += &format!("{:20} ", skagau_lerpoi(&glosa, morna).cyan());
   }
 
   if let Some(selmaho) = &valsi.selmaho {
-    print!("{:>7} ", selmaho);
+    lerpoi += &format!("{:>7} ", selmaho);
   }
-  print!("{:20} ", format!("({})", valsi.klesi.green()));
-  print!("{:10} ", format!("[@{}]", valsi.krasi));
-  println!("");
+  lerpoi += &format!("{:20} ", format!("({})", valsi.klesi.green()));
+  lerpoi += &format!("{:10} ", format!("[@{}]", valsi.krasi));
+  lerpoi += "\n";
 
   if let Some(smuni) = &valsi.smuni {
-    print!("  {}", skagau_lerpoi(smuni, morna));
+    lerpoi += &format!("  {}", skagau_lerpoi(smuni, morna));
   }
   if let Some(pinka) = &valsi.pinka {
-    println!("\n");
-    print!("  {}", skagau_lerpoi(pinka, morna));
+    lerpoi += "\n\n";
+    lerpoi += &format!("  {}", skagau_lerpoi(pinka, morna));
   }
-  println!("")
+  lerpoi += "\n";
+
+  lerpoi
 }
 
 fn skagau_lerpoi(lerpoi: &str, morna: &Morna) -> String {

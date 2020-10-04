@@ -2,7 +2,6 @@ use std::convert::TryFrom;
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;
-use structopt::StructOpt;
 use sxd_document::parser as xml_turfahi;
 use sxd_xpath;
 
@@ -10,9 +9,10 @@ use crate::kampu::*;
 use crate::sidju;
 use crate::vlacku::{Valsi, Vlacku};
 
-fn nerbei(vlacku: &mut Vlacku, krasi_sfaile: &Path) -> Result<()> {
+fn nerbei(krasi_sfaile: &Path, sorcu_sfaile: &Path) -> Result<Vlacku> {
   use sxd_xpath::{Context, Factory, Value};
 
+  let mut vlacku = Vlacku::zbasu(sorcu_sfaile);
   let sfaile_xadni = sidju::tolsorcu_sfaile(krasi_sfaile)?;
   let xml_xadni = xml_turfahi::parse(&sfaile_xadni)?;
   let uencu = xml_xadni.as_document();
@@ -28,17 +28,17 @@ fn nerbei(vlacku: &mut Vlacku, krasi_sfaile: &Path) -> Result<()> {
   let valsi_gunma =
     match valsi_xy_pluta.evaluate(&Context::new(), uencu.root())? {
       Value::Nodeset(da) => da,
-      _ => return Err(anyhow!("invalid xml")),
+      _ => bail!("invalid xml"),
     };
 
   for valsi_tcana in valsi_gunma {
     let tcana = valsi_tcana.element().ok_or(anyhow!("invalid xml"))?;
     let valsi = Valsi::try_from(tcana)?;
     // pu'o zukte .i julne fi loi tolci'o valsi (obsolete words)
-    vlacku.sorcu.push(valsi);
+    vlacku.selci.push(valsi);
   }
 
-  Ok(())
+  Ok(vlacku)
 }
 
 impl<'d> TryFrom<sxd_document::dom::Element<'d>> for Valsi {
@@ -92,52 +92,23 @@ fn xy_pluta_pe_lo_valsi(pluta: &str) -> sxd_xpath::XPath {
   fanri.build(&format!("string({})", pluta)).unwrap().unwrap()
 }
 
-#[derive(StructOpt)]
-#[structopt(
-  name = "convert",
-  about = "Convert xml dump from jbovlaste",
-  long_about = "Convert xml dump from jbovlaste (<dict> must be writable)",
-)]
-pub struct Tergalfi {
-  #[structopt(
-    name = "from",
-    short,
-    long,
-    parse(from_os_str),
-    help = "Location of XML dump file"
-  )]
-  krasi: PathBuf,
-}
-
 #[derive(Clone, Serialize, Debug)]
 pub struct Teryruhe {
   klani: usize,
 }
 
-impl crate::TciTeryruhe for Teryruhe {
-  fn termontai_lo_vlamei(&self) {
+impl ToString for Teryruhe {
+  fn to_string(&self) -> String {
     use colored::*;
-    println!("{} words converted.", self.klani.to_string().blue());
-  }
-
-  fn termontai_lahe_jeison(&self) {
-    println!("{}", serde_json::to_string(self).unwrap())
+    format!("{} words converted.\n", self.klani.to_string().blue())
   }
 }
 
-pub fn bixygau(
-  tergaf: &crate::Tergalfi,
-  vlacku: &mut Vlacku,
-) -> Result<Teryruhe> {
-  use crate::Minde::Bixygau;
-  let bixygau_tergaf = match &tergaf.minde {
-    Bixygau(da) => da,
-    _ => unreachable!(),
-  };
-
-  nerbei(vlacku, &bixygau_tergaf.krasi)?;
+pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<impl Reltai> {
+  let krasi = value_t!(selruhe, "from", PathBuf).unwrap();
+  let vlacku = nerbei(&krasi, &vanbi.vlacku_sfaile())?;
   vlacku.sorcu()?;
 
-  let klani = vlacku.sorcu.len();
+  let klani = vlacku.terkancu();
   Ok(Teryruhe { klani })
 }

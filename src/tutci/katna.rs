@@ -1,17 +1,7 @@
 use crate::kampu::*;
-use crate::vlacku::{Valsi, Vlacku};
 
 use itertools::Itertools;
 use serde::Serialize;
-use serde_json;
-use structopt::StructOpt;
-
-#[derive(Debug, StructOpt)]
-#[structopt(name = "tanru", about = "Split lujvo into tanru")]
-pub struct Tergalfi {
-  #[structopt(name = "word")]
-  lujvo: String,
-}
 
 #[derive(Clone, Serialize, Debug)]
 pub struct Rafpoi(Vec<Rafsi>);
@@ -20,12 +10,11 @@ pub struct Rafpoi(Vec<Rafsi>);
 pub struct Teryruhe {
   rafsi: Rafpoi,
   tanru: Vec<Option<Valsi>>,
-
 }
 
-
-impl crate::TciTeryruhe for Teryruhe {
-  fn termontai_lo_vlamei(&self) {
+impl ToString for Teryruhe {
+  fn to_string(&self) -> String {
+    let mut lerpoi = String::new();
     use colored::*;
 
     let rafsi: String = self
@@ -67,32 +56,23 @@ impl crate::TciTeryruhe for Teryruhe {
       .collect::<Vec<_>>()
       .join(" + ");
 
-    println!("{}", rafsi);
-    println!("{}", tanru);
-    println!("{}", glosa);
-  }
-
-  fn termontai_lahe_jeison(&self) {
-    println!("{}", serde_json::to_string(self).unwrap())
+    lerpoi += &format!("{}\n", rafsi);
+    lerpoi += &format!("{}\n", tanru);
+    lerpoi += &format!("{}\n", glosa);
+    lerpoi
   }
 }
 
-pub fn tanru(tergaf: &crate::Tergalfi, vlacku: &Vlacku) -> Result<Teryruhe> {
-  use crate::Minde::Tanru;
-  let tamsmi_tergaf = match &tergaf.minde {
-    Tanru(da) => da,
-    _ => unreachable!(),
-  };
-
-  match Rafpoi::genturfahi(tamsmi_tergaf.lujvo.as_str()).as_slice() {
-    [] => return Err(anyhow!("not found")),
-    [rafpoi] => {
-      return Ok(Teryruhe {
-        rafsi: rafpoi.clone(),
-        tanru: rafpoi.vlaste_sisku(vlacku),
-      })
-    }
-    [..] => return Err(anyhow!("multiple results found")),
+pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<Teryruhe> {
+  let lujvo = value_t!(selruhe, "lujvo", String).unwrap();
+  let vlacku = vanbi.vlacku()?;
+  match Rafpoi::genturfahi(&lujvo).as_slice() {
+    [] => bail!("no valid tanru found"),
+    [rafpoi] => Ok(Teryruhe {
+      rafsi: rafpoi.clone(),
+      tanru: rafpoi.vlaste_sisku(&vlacku),
+    }),
+    [..] => bail!("multiple results found"),
   }
 }
 
@@ -233,7 +213,7 @@ impl Rafsi {
   fn vlaste_sisku(&self, vlacku: &Vlacku) -> Option<Valsi> {
     use Raflei::*;
 
-    for valsi in &vlacku.sorcu {
+    for valsi in vlacku.iter() {
       let found = match self.klesi {
         Brarafsi => valsi.cmene.starts_with(&self.rafsi[0..4]),
         Gismu(_) => valsi.cmene == self.rafsi,

@@ -1,0 +1,81 @@
+name: gernytci
+
+args:
+  - official-only:
+      short: "o"
+      long: "official-only"
+      help: "Only entries from @official_data only"
+  - dict:
+      short: "d"
+      long: "dict"
+      value_name: "dict"
+      default_value: "[built-in]"
+      help: "Specify custom dictionary"
+  - format:
+      short: "f"
+      help: "Output format"
+      default_value: "text"
+      possible_values:
+        - json
+        - text
+
+subcommands:
+  - hello:
+      aliases:
+        - coi
+      about: Greetings!
+      args:
+        - goodbye:
+            help: "Good bye"
+            short: "b"
+        - target: {}
+
+  - search:
+      about: Search in dictionary
+      aliases:
+        - sisku
+      args:
+        - count:
+            short: "c"
+            default_value: "5"
+            help: "Number of results to return"
+        - keyword:
+            help: "Keyword(s) to search for"
+            multiple: true
+            required: true
+
+  - tamsmi:
+      about: Search words resembling in shape
+      args:
+        - count:
+            short: "c"
+            default_value: "10"
+            help: "Number of results to return"
+        - word:
+            help: "Reference word"
+            required: true
+
+  - cut:
+      aliases:
+        - tanru
+        - katna
+      about: Decompose lujvo into tanru
+      args:
+        - lujvo:
+            help: "The lujvo to be cut"
+            required: true
+
+  - convert:
+      aliases:
+        - bixygau
+      about: "Convert xml dump from jbovlaste (dict needs to be writable)"
+      args:
+        - from:
+            aliases:
+              - krasi
+            short: "f"
+            help: "Path of XML dump file"
+            required: true
+
+settings:
+  - SubcommandRequiredElseHelp
