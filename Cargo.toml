@@ -8,7 +8,6 @@ edition = "2018"
 
 
 [dependencies]
-structopt = "0.3"
 flate2 = "0.2"
 distance = "0.4"
 anyhow = "1.0"
@@ -21,3 +20,4 @@ colored = "1.9"
 itertools = "0.9"
 difference = "2.0"
 clap = { version = "2.33.3", features = ["yaml"] }
+derive_more = "0.99.11"
