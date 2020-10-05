@@ -52,15 +52,9 @@ impl Gismu {
   pub fn lerpoi_jvasahe(valsi: &str, gimlei: Gimlei) -> bool {
     use Gimlei::*;
 
-    let zunsna_sarxe = |xoxipa, xoxire| {
-      let pa = valsi.chars().nth(xoxipa).unwrap();
-      let re = valsi.chars().nth(xoxire).unwrap();
-      Lerfu::zunsna_sarxe(pa, re)
-    };
-
     match gimlei {
-      CVCCV if zunsna_sarxe(2, 3) => true,
-      CCVCV if zunsna_sarxe(0, 1) => true,
+      CVCCV if Lerfu::zunsna_sarxe(&valsi[2..=3]) => true,
+      CCVCV if Lerfu::zunsna_sarxe(&valsi[0..=1]) => true,
       _ => false,
     }
   }

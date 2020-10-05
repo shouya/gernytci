@@ -142,6 +142,15 @@ impl Rafsi {
     cumki
   }
 
+  pub fn zbasu(lerpoi: &str, terjonlehu: Option<char>) -> Result<Rafsi> {
+    ensure!(Self::jvasahe(lerpoi, terjonlehu), "rafsi is not legal");
+
+    Ok(Rafsi {
+      rafsi: lerpoi.into(),
+      terjonlehu,
+    })
+  }
+
   pub fn jvasahe(lerpoi: &str, terjonlehu: Option<char>) -> bool {
     if lerpoi.len() < 3 || lerpoi.len() > 5 {
       return false;
@@ -158,15 +167,10 @@ impl Rafsi {
 
   pub fn lerpoi_jvasahe(lerpoi: &str, raflei: Raflei) -> bool {
     use Raflei::*;
-    let zunsna_sarxe = |xoxipa, xoxire| {
-      let pa = lerpoi.chars().nth(xoxipa).unwrap();
-      let re = lerpoi.chars().nth(xoxire).unwrap();
-      Lerfu::zunsna_sarxe(pa, re)
-    };
 
     match raflei {
       CVC | CVhV | CVV => true,
-      CCV if zunsna_sarxe(0, 1) => true,
+      CCV if Lerfu::zunsna_sarxe(&lerpoi[0..=1]) => true,
       GismuRafsi(gimlei) => Gismu::lerpoi_jvasahe(lerpoi, gimlei),
       Brarafsi(gimlei) => Gismu::lerpoi_jvasahe(lerpoi, gimlei),
       _ => false,

@@ -27,61 +27,56 @@ impl Lerfu {
     }
   }
 
-  pub fn zunsna_sarxe<T: Into<Lerfu>>(pa: T, re: T) -> bool {
-    let (Lerfu(pa), Lerfu(re)) = (pa.into(), re.into());
+  pub fn zunsna_sarxe(remei: &str) -> bool {
+    let pamoi = remei.chars().nth(0).unwrap();
+    let remoi = remei.chars().nth(1).unwrap();
 
     // zoi gy. It is forbidden for both consonants to be the same
     // gy. ra'i la .cylyly.
-    if pa == re {
+    if pamoi == remoi {
       return false;
     }
 
     // zoi gy. It is forbidden for one consonant to be voiced and the
     // other unvoiced .gy ra'i la .cylyly.
-    if VOKSA_ZUNSNA.contains(pa) && VOKCAU_ZUNSNA.contains(re)
-      || VOKSA_ZUNSNA.contains(re) && VOKCAU_ZUNSNA.contains(pa)
+    if VOKSA_ZUNSNA.contains(pamoi) && VOKCAU_ZUNSNA.contains(remoi)
+      || VOKSA_ZUNSNA.contains(remoi) && VOKCAU_ZUNSNA.contains(pamoi)
     {
       return false;
     }
 
     // zoi gy. It is forbidden for both consonants to be drawn from
     // the set c, j, s, z. .gy ra'i la .cylyly.
-    if "cjsz".contains(pa) && "cjsz".contains(re) {
+    if "cjsz".contains(pamoi) && "cjsz".contains(remoi) {
       return false;
     }
 
     // zoi gy. The specific pairs cx, kx, xc, xk, and mz are forbidden .gy
-    let porsi: String = [pa, re].iter().collect();
-    if ["cx", "kx", "xc", "xk", "mz"].contains(&&porsi[..]) {
+    if ["cx", "kx", "xc", "xk", "mz"].contains(&remei) {
       return false;
     }
 
     return true;
   }
 
-  pub fn lidne_zunsna_sarxe<T: Into<Lerfu>>(pa: T, re: T) -> bool {
-    let (Lerfu(pa), Lerfu(re)) = (pa.into(), re.into());
-    let porsi: String = [pa, re].iter().collect();
-    return CURMI_ZUNSNA_REMEI.contains(&&porsi[..]);
+  pub fn lidne_zunsna_sarxe(remei: &str) -> bool {
+    return CURMI_ZUNSNA_REMEI.contains(&&remei[..]);
   }
 
-  pub fn zunsna_cimei_sarxe<T: Into<Lerfu>>(pa: T, re: T, ci: T) -> bool {
-    let (Lerfu(pa), Lerfu(re), Lerfu(ci)) = (pa.into(), re.into(), ci.into());
-    let porsi: String = [pa, re, ci].iter().collect();
-
+  pub fn zunsna_cimei_sarxe(cimei: &str) -> bool {
     // zoi gy. The first two consonants must constitute a permissible
     // consonant pair .gy
-    if !Self::zunsna_sarxe(pa, re) {
+    if !Self::zunsna_sarxe(&cimei[0..=1]) {
       return false;
     }
 
     // zoi gy. The last two consonants must constitute a permissible
     // initial consonant pair .gy
-    if !Self::lidne_zunsna_sarxe(re, ci) {
+    if !Self::lidne_zunsna_sarxe(&cimei[1..=2]) {
       return false;
     }
 
-    if ["ndj", "ndz", "ntc", "nts"].contains(&&porsi[..]) {
+    if ["ndj", "ndz", "ntc", "nts"].contains(&&cimei[..]) {
       return false;
     }
 

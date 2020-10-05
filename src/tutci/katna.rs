@@ -91,7 +91,7 @@ mod tests {
     xusra_katna("ba'urdjica", "ba'ur/djica");
     xusra_katna("ba'urdu'u", "ba'ur/du'u");
 
-    // xusra_katna("ri'ornimre", "ri'or/nimre");
+    xusra_katna("ri'ornimre", "ri'or/nimre");
 
     xusra_naljvasahe("saiycli");
     xusra_naljvasahe("saircli");
