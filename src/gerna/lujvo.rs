@@ -226,7 +226,7 @@ impl Lujvo {
               // ybu
               //
               // i mi lazni lo ka ciska lo javni poi traji lo ka drani
-              // i le'i nu pruce ku cu banzu so'a cumki vau pe'i
+              // i le'i nu pruce ku cu banzu fi so'a cumki vau pe'i
               Some('y') | None => (),
               _ => return false,
             }
