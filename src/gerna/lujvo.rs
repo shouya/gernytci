@@ -47,9 +47,10 @@ impl Lujvo {
     let romoi = liste.last().unwrap();
 
     match romoi.klesi() {
-      CCV | CVC | CVV | CVhV => (),
+      CCV | CVV | CVhV => (),
       GismuRafsi(_) => (),
       Brarafsi(_) => bail!("last rafsi in a lujvo cannot be 4-letter"),
+      CVC => bail!("last rafsi cannot be of CVC form"),
     }
 
     for rafsi in liste.iter().take(liste.len() - 1) {
@@ -163,7 +164,6 @@ impl Lujvo {
     // zoi gy. If there are more than two words in the tanru, put an
     // r-hyphen (or an n-hyphen) after the first rafsi if it is
     // CVV-form. .gy
-
     if porsi.len() > 2 {
       if porsi[0].klesi().xu_tamsmi_cyvyvy() {
         match porsi[0].terjonlehu {
@@ -177,15 +177,19 @@ impl Lujvo {
     // (or an n-hyphen) between the two rafsi if the first rafsi is
     // CVV-form, unless the second rafsi is CCV-form (for example,
     // saicli requires no hyphen) .gy
-
     if porsi.len() == 2 {
       if porsi[0].klesi().xu_tamsmi_cyvyvy() {
         if porsi[1].klesi() == CCV {
-          bapli!(porsi[0].terjonlehu.is_none())
+          if porsi[0].terjonlehu.is_none() {
+            return true;
+          } else {
+            return false;
+          }
         } else {
           bapli!(
             porsi[0].terjonlehu == Some('n')
               || porsi[0].terjonlehu == Some('r')
+              || porsi[0].terjonlehu == None
           )
         }
 
@@ -202,20 +206,37 @@ impl Lujvo {
 
     // cipcta lo du'u loi rafsi remei ku jo'u lo terjonle'u cu sarxe
     for (seltau, tertau) in porsi.iter().tuple_windows() {
-      let terjonlehu = seltau.terjonlehu;
       let remei = format!(
         "{}{}",
         &seltau.rafsi[seltau.rafsi.len() - 1..],
         &tertau.rafsi[..1]
       );
 
-      if !(seltau.klesi().xu_sampu() && tertau.klesi().xu_sampu()) {
-        continue;
-      }
-
-      if !Lerfu::zunsna_sarxe(&remei) {
-        bapli!(!terjonlehu.is_none())
-      }
+      match seltau.klesi() {
+        Brarafsi(_) => bapli!(seltau.terjonlehu == Some('y')),
+        CVC => {
+          if Lerfu::zunsna_sarxe(&remei) {
+            match seltau.terjonlehu {
+              // naku mulno drani .i cafne fa lo ka banzu be fa lo
+              // du'u cipra fa tu'a la'o gy. None .gy va'o lodu'u lei
+              // lerfu cu zunsna sarxe
+              //
+              // i ku'i tu'a lo zoi gy. tosmabru .gy fliba cu curmi lo
+              // cumki je po'oje'u cumki ku be le terjonle'u po'u zo
+              // ybu
+              //
+              // i mi lazni lo ka ciska lo javni poi traji lo ka drani
+              // i le'i nu pruce ku cu banzu so'a cumki vau pe'i
+              Some('y') | None => (),
+              _ => return false,
+            }
+          }
+          if !Lerfu::zunsna_sarxe(&remei) && seltau.terjonlehu != Some('y') {
+            return false;
+          }
+        }
+        _ => continue,
+      };
     }
 
     true
@@ -282,5 +303,14 @@ impl Lujvo {
       .iter()
       .map(|x| x.vlaste_sisku(vlaste).map(|x| x.clone()))
       .collect()
+  }
+}
+
+#[cfg(test)]
+mod test {
+
+  #[test]
+  fn coi() {
+    println!("1")
   }
 }

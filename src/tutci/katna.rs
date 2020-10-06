@@ -77,13 +77,14 @@ mod tests {
 
   #[test]
   fn cipra_katna_lujvo() {
-    xusra_katna("saiclire", "sai/clire");
+    xusra_katna("saircilre", "sair/cilre");
     xusra_katna("saicli", "sai/cli");
     xusra_katna("sanmycli", "sanmy/cli");
     xusra_katna("sanmycilre", "sanmy/cilre");
     xusra_katna("zvaju'o", "zva/ju'o");
     xusra_katna("ju'ozva", "ju'o/zva");
     xusra_katna("cmeterge'a", "cme/ter/ge'a");
+    xusra_katna("tosymabru", "tosy/mabru");
 
     xusra_katna("famyma'o", "famy/ma'o");
     xusra_katna("mitysisku", "mity/sisku");
@@ -92,8 +93,10 @@ mod tests {
     xusra_katna("ba'urdu'u", "ba'ur/du'u");
 
     xusra_katna("ri'ornimre", "ri'or/nimre");
+    xusra_katna("tosmabru", "tosmabru");
 
     xusra_naljvasahe("saiycli");
+    xusra_naljvasahe("saicilre");
     xusra_naljvasahe("saircli");
     xusra_naljvasahe("saincli");
 
@@ -101,6 +104,9 @@ mod tests {
     xusra_naljvasahe("dit");
     xusra_naljvasahe("dity");
     xusra_naljvasahe("skamiskami");
+
+    // caku la'e zoi gy. tosmabru .gy cu naku drani
+    // xusra_naljavsahe("tosmabru");
   }
 
   fn xusra_naljvasahe(lujvo: &str) {
