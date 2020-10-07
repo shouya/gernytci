@@ -85,6 +85,7 @@ mod tests {
     xusra_katna("ju'ozva", "ju'o/zva");
     xusra_katna("cmeterge'a", "cme/ter/ge'a");
     xusra_katna("tosymabru", "tosy/mabru");
+    xusra_katna("ci'erkeilai", "ci'er/kei/lai");
 
     xusra_katna("famyma'o", "famy/ma'o");
     xusra_katna("mitysisku", "mity/sisku");

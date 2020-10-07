@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::convert::TryFrom;
 
 use crate::kampu::*;
 
@@ -16,6 +17,15 @@ macro_rules! bapli {
 impl ToString for Lujvo {
   fn to_string(&self) -> String {
     self.0.iter().map(Rafsi::to_string).collect()
+  }
+}
+
+impl TryFrom<&str> for Lujvo {
+  type Error = anyhow::Error;
+  fn try_from(t: &str) -> Result<Self> {
+    Self::genturfahi(t)
+      .pop()
+      .ok_or_else(|| anyhow!("Invalid lujvo"))
   }
 }
 
@@ -309,13 +319,71 @@ impl Lujvo {
       .map(|x| x.vlaste_sisku(vlaste).map(|x| x.clone()))
       .collect()
   }
+
+  pub fn jvovahi(&self) -> usize {
+    use Gimlei::*;
+    use Raflei::*;
+
+    // zoi gy. 1. Count the total number of letters, including hyphens
+    // and apostrophes; call it L .gy
+    let l = self.to_string().len();
+    // zoi gy. 2. Count the number of apostrophes; call it A .gy
+    let a = self.to_string().chars().filter(|x| *x == '\'').count();
+    // zoi gy. 3. Count the number of y-, r-, and n-hyphens; call it H
+    // .gy
+    let h = self.0.iter().flat_map(|x| x.terjonlehu).count();
+
+    // zoi gy. 4. For each rafsi, find the value in the following
+    // table. Sum this value over all rafsi; call it R gy
+    let r: usize = self
+      .0
+      .iter()
+      .map(|x| match x.klesi() {
+        // zo sarji mu'a
+        GismuRafsi(CVCCV) => 1,
+        // ra'oi sarj mu'a
+        Brarafsi(CVCCV) => 2,
+        // zo zbasu mu'a
+        GismuRafsi(CCVCV) => 3,
+        // ra'oi zbas mu'a
+        Brarafsi(CCVCV) => 4,
+        // ra'oi nun mu'a
+        CVC => 5,
+        // ra'oi ta'u mu'a
+        CVhV => 6,
+        // ra'oi zba mu'a
+        CCV => 7,
+        // ra'oi sai mu'a
+        CVV => 8,
+      })
+      .sum();
+
+    // zoi gy. 5 Count the number of vowels, not including y; call it
+    // V .gy
+    let v = self
+      .to_string()
+      .chars()
+      .filter(|x| "aeiou".contains(*x))
+      .collect::<String>()
+      .len();
+
+    // zoi gy. The score is then: (1000 * L) - (500 * A) + (100 * H) -
+    // (10 * R) - V .gy
+    1000 * l - 500 * a + 100 * h - 10 * r - v
+  }
 }
 
 #[cfg(test)]
 mod test {
+  use super::*;
 
   #[test]
-  fn coi() {
-    println!("1")
+  fn jvovahi_cu_satci() {
+    let jvovahi = |jvo: &str| Lujvo::try_from(jvo).unwrap().jvovahi();
+
+    assert_eq!(jvovahi("zbasai"), 5847);
+    assert_eq!(jvovahi("nunynau"), 6967);
+    assert_eq!(jvovahi("sairzbata'u"), 10385);
+    assert_eq!(jvovahi("zbazbasysarji"), 12976);
   }
 }
