@@ -307,9 +307,6 @@ impl Lujvo {
     }
 
     teryruhe
-      .into_iter()
-      .filter(|x| Self::pagbu_jvasahe(x))
-      .collect()
   }
 
   pub fn vlaste_sisku(&self, vlaste: &Vlacku) -> Vec<Option<Valsi>> {
