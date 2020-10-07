@@ -1,9 +1,34 @@
 use crate::kampu::*;
 
+type Jvovahi = usize;
+
 #[derive(Clone, Serialize, Debug)]
 pub struct Teryruhe {
-  lei_ciski: Vec<Valsi>,
-  lei_lujvo: Vec<Lujvo>,
+  lei_selyspu: Vec<String>,
+  lei_tanru: Vec<Valsi>,
+  lei_lujvo: Vec<(Jvovahi, Lujvo)>,
+}
+
+impl ToString for Teryruhe {
+  fn to_string(&self) -> String {
+    let valsi_lerpoi = self.lei_tanru.iter().map(|x| x.cmene.clone()).join(" ");
+    let glosa_lerpoi = self
+      .lei_tanru
+      .iter()
+      .map(|x| x.glosa.clone().unwrap_or("...".into()))
+      .join(" + ");
+    let lei_lujvo_vlalihi = self
+      .lei_lujvo
+      .iter()
+      .map(|(vamji, lujvo)| format!("- {} ({})", lujvo.to_string(), vamji))
+      .join("\n");
+    format!(
+      "{}\n{}\n{}\n",
+      valsi_lerpoi,
+      glosa_lerpoi,
+      lei_lujvo_vlalihi,
+    )
+  }
 }
 
 #[derive(Clone, Debug)]
@@ -14,8 +39,8 @@ enum Selci {
 
 pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<Teryruhe> {
   let vlacku = vanbi.vlacku()?;
-  let lei_tanru = values_t!(selruhe, "tanru", String).unwrap();
-  let lei_valsi: Vec<Valsi> = lei_tanru
+  let lei_selyspu = values_t!(selruhe, "tanru", String).unwrap();
+  let lei_tanru: Vec<Valsi> = lei_selyspu
     .iter()
     .flat_map(|da| match Lujvo::genturfahi(da).pop() {
       Some(lujvo) => lujvo
@@ -32,11 +57,17 @@ pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<Teryruhe> {
     })
     .collect::<Result<_>>()?;
 
-  let lei_lujvo = ro_cumki(&lei_valsi);
-  for jvo in lei_lujvo.iter() {
-    println!("{}", jvo.to_string())
-  }
-  bail!("unimplemented");
+  let lei_lujvo = ro_cumki(&lei_tanru)
+    .into_iter()
+    .map(|lujvo| (lujvo.jvovahi(), lujvo))
+    .sorted_by_key(|(vamji, _)| *vamji)
+    .collect_vec();
+
+  Ok(Teryruhe {
+    lei_lujvo,
+    lei_selyspu,
+    lei_tanru,
+  })
 }
 
 impl Selci {
@@ -68,10 +99,4 @@ fn ro_cumki(lei_selci: &Vec<Valsi>) -> Vec<Lujvo> {
     .into_iter()
     .filter_map(|rafpoi| Lujvo::finti(&rafpoi).ok())
     .collect_vec()
-}
-
-impl ToString for Teryruhe {
-  fn to_string(&self) -> String {
-    format!("{}", "coi")
-  }
 }
