@@ -1,3 +1,5 @@
+pub use std::convert::{From, Into, TryFrom, TryInto};
+
 pub use crate::gerna::*;
 pub use crate::{Reltai, Valsi, Vanbi, Vlacku};
 

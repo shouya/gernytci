@@ -26,11 +26,11 @@ pub struct Valsi {
 }
 
 impl Valsi {
-  pub fn tordu_ciski(&self) -> Option<String> {
+  pub fn tordu_ciski(&self, xo: usize) -> Option<String> {
     self
       .glosa
       .clone()
-      .or_else(|| self.smuni.as_ref().map(|x| String::from(&x[..=50])))
+      .or_else(|| self.smuni.as_ref().map(|da| String::from(&da[..=xo])))
   }
 
   pub fn cpacu(&self, ckaji: &str) -> Option<String> {
