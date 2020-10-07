@@ -48,7 +48,8 @@ Planned features:
 - [X] cut - lujvo decomposing tool
 - [X] lujvo - lujvo making tool
 - [ ] grammar - beta grammar checker (camxes)
-- [ ] bai - BAI <=> gismu lookup
+- [X] bai - BAI <=> gismu lookup
+- [ ] rafsi - gismu <=> rafsi lookup
 - [ ] lookup - lookup a word in dictionary
 - [ ] example - [[https://tatoeba.org/jbo/][Tatoeba]] search
 - [ ] more...

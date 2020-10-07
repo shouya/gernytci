@@ -177,8 +177,8 @@ impl Lujvo {
   fn pagbu_jvasahe(porsi: &[Rafsi]) -> bool {
     use Raflei::*;
 
-    if porsi.len() <= 1 {
-      return true;
+    if porsi.len() < 2 {
+      return false;
     }
 
     // zoi gy. If there are more than two words in the tanru, put an

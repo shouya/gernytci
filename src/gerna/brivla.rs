@@ -1,6 +1,6 @@
 use crate::kampu::*;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, PartialEq)]
 pub enum Brivla {
   Gismu(Gismu),
   Lujvo(Lujvo),

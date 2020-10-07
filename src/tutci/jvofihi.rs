@@ -95,9 +95,11 @@ impl TerspuSelci {
         .collect_vec()
     });
 
+    let rafsi = Rafsi::try_from(terspu).map(|da| vec![TerspuSelci::Rafsi(da)]);
+
     let cmavo = Ok(vec![TerspuSelci::Sampu(terspu.to_string())]);
 
-    lei_lujvo.or(cmavo)
+    lei_lujvo.or(rafsi).or(cmavo)
   }
 
   fn cmene(&self) -> &str {
