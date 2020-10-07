@@ -46,9 +46,10 @@ Planned features:
 - [X] convert - convert jbovlaste dump file
 - [X] search - search keyword in dictionary
 - [X] cut - lujvo decomposing tool
-- [ ] lujvo - lujvo making tool
+- [X] lujvo - lujvo making tool
 - [ ] grammar - beta grammar checker (camxes)
 - [ ] bai - BAI <=> gismu lookup
+- [ ] lookup - lookup a word in dictionary
 - [ ] example - [[https://tatoeba.org/jbo/][Tatoeba]] search
 - [ ] more...
 
