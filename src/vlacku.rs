@@ -39,6 +39,15 @@ impl Valsi {
       _ => None,
     }
   }
+
+  pub fn ro_rafsi(&self) -> Vec<String> {
+    let mut rafsi = self.rafsi.clone();
+    if self.klesi == "gismu" {
+      rafsi.push((&self.cmene[..4]).to_string());
+      rafsi.push((&self.cmene[..]).to_string());
+    }
+    rafsi
+  }
 }
 
 #[derive(Debug)]
@@ -152,8 +161,13 @@ impl Vlacku {
     Ok(())
   }
 
-  #[allow(dead_code)]
   pub fn zvafahi(&self, cmene: &str) -> Option<Valsi> {
+    self
+      .zvafahi_satci(cmene)
+      .or_else(|| self.zvafahi_satci(&Self::yhybu(cmene)))
+  }
+
+  pub fn zvafahi_satci(&self, cmene: &str) -> Option<Valsi> {
     self.zbasu_indice();
     self
       .indice
@@ -173,5 +187,9 @@ impl Vlacku {
       }
       self.indice.replace(Some(indice_zbasu));
     }
+  }
+
+  fn yhybu(lerpoi: &str) -> String {
+    lerpoi.replace('h', "'")
   }
 }

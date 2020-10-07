@@ -13,16 +13,21 @@ macro_rules! bapli {
   };
 }
 
+impl ToString for Lujvo {
+  fn to_string(&self) -> String {
+    self.0.iter().map(Rafsi::to_string).collect()
+  }
+}
+
 impl Lujvo {
   pub fn iter(&self) -> impl Iterator<Item = &Rafsi> {
     self.0.iter()
   }
 
-  #[allow(dead_code)]
-  fn finti(porsi: &[&str]) -> Result<Lujvo> {
+  pub fn finti<T: AsRef<str>>(porsi: &[T]) -> Result<Lujvo> {
     let rafsi_liste: Vec<Rafsi> = porsi
       .iter()
-      .map(|x| Rafsi::zbasu(x, None))
+      .map(|x| Rafsi::zbasu(x.as_ref(), None))
       .collect::<Result<_>>()?;
 
     let lujvo = Self::jongau(rafsi_liste)?;
@@ -249,7 +254,7 @@ impl Lujvo {
       return false;
     }
 
-    if porsi.len() < 2 {
+    if porsi.len() < 1 {
       return false;
     }
 

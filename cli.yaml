@@ -77,5 +77,16 @@ subcommands:
             help: "Path of XML dump file"
             required: true
 
+  - lujvo:
+      aliases:
+        - jvofihi
+        - jvofinti
+      about: "Create lujvo from a tanru"
+      args:
+        - tanru:
+            help: "The tanru to be processed"
+            required: true
+            multiple: true
+
 settings:
   - SubcommandRequiredElseHelp
