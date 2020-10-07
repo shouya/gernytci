@@ -45,6 +45,7 @@ impl ToString for Gismu {
 }
 
 impl Gismu {
+  #[allow(dead_code)]
   pub fn jvasahe(valsi: &str) -> bool {
     if valsi.len() != 5 {
       return false;

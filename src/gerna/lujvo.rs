@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 
 use crate::kampu::*;
 
-#[derive(Clone, Serialize, From, Debug)]
+#[derive(Clone, Serialize, From, Debug, PartialEq)]
 pub struct Lujvo(Vec<Rafsi>);
 
 macro_rules! bapli {
