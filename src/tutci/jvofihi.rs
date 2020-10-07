@@ -24,9 +24,7 @@ impl ToString for Teryruhe {
       .join("\n");
     format!(
       "{}\n{}\n{}\n",
-      valsi_lerpoi,
-      glosa_lerpoi,
-      lei_lujvo_vlalihi,
+      valsi_lerpoi, glosa_lerpoi, lei_lujvo_vlalihi,
     )
   }
 }
@@ -39,7 +37,11 @@ enum Selci {
 
 pub fn pruce(selruhe: &ArgMatches, vanbi: &Vanbi) -> Result<Teryruhe> {
   let vlacku = vanbi.vlacku()?;
-  let lei_selyspu = values_t!(selruhe, "tanru", String).unwrap();
+  let lei_selyspu: Vec<String> = values_t!(selruhe, "tanru", String)
+    .unwrap()
+    .into_iter()
+    .flat_map(|x| x.split(" ").map(String::from).collect_vec())
+    .collect_vec();
   let lei_tanru: Vec<Valsi> = lei_selyspu
     .iter()
     .flat_map(|da| match Lujvo::genturfahi(da).pop() {
@@ -93,7 +95,7 @@ impl Selci {
 fn ro_cumki(lei_selci: &Vec<Valsi>) -> Vec<Lujvo> {
   lei_selci
     .iter()
-    .map(|x| x.ro_rafsi())
+    .map(|valsi| valsi.rafsi_mei())
     .multi_cartesian_product()
     .collect_vec()
     .into_iter()

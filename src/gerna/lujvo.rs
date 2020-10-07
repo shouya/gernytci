@@ -116,8 +116,8 @@ impl Lujvo {
   fn fendi_zunsna_jongau(liste: &mut [Rafsi]) -> Result<()> {
     let liste_fukpi = liste.to_vec();
 
-    for (seltau, tertau) in liste.iter_mut().zip(liste_fukpi.iter()) {
-      let lerpoi = format!("{}{}", &seltau.rafsi[..=0], &tertau.rafsi[1..=1]);
+    for (seltau, tertau) in liste.iter_mut().zip(liste_fukpi.iter().skip(1)) {
+      let lerpoi = format!("{}{}", seltau.romoi_lerfu(), tertau.pamoi_lerfu());
       // zoi gy. Put a y-hyphen between the consonants of any
       // impermissible consonant pair. This will always appear between
       // rafsi .gy
@@ -150,22 +150,27 @@ impl Lujvo {
     use Gimlei::*;
     use Raflei::*;
 
+    let mut tosmabru = false;
     for (pamoi, remoi) in liste.iter().tuple_windows() {
       if pamoi.klesi() != CVC {
         return Ok(());
       }
 
-      if pamoi.terjonlehu == Some('y') || remoi.klesi() == GismuRafsi(CVCCV) {
-        break;
-      }
-
-      let lerpoi = format!("{}{}", &pamoi.rafsi[..=0], &remoi.rafsi[1..=1]);
+      let lerpoi = format!("{}{}", pamoi.romoi_lerfu(), remoi.pamoi_lerfu());
       if !Lerfu::lidne_zunsna_sarxe(&lerpoi) {
         return Ok(());
       }
+
+      if pamoi.terjonlehu == Some('y') || remoi.klesi() == GismuRafsi(CVCCV) {
+        tosmabru = true;
+        break;
+      }
     }
 
-    liste[0].terjonlehu = Some('y');
+    if tosmabru {
+      liste[0].terjonlehu = Some('y');
+    }
+
     Ok(())
   }
 

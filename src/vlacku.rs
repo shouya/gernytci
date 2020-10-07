@@ -26,6 +26,13 @@ pub struct Valsi {
 }
 
 impl Valsi {
+  pub fn tordu_ciski(&self) -> Option<String> {
+    self
+      .glosa
+      .clone()
+      .or_else(|| self.smuni.as_ref().map(|x| String::from(&x[..=50])))
+  }
+
   pub fn cpacu(&self, ckaji: &str) -> Option<String> {
     match ckaji {
       "cmene" => Some(self.cmene.clone()),
@@ -40,7 +47,7 @@ impl Valsi {
     }
   }
 
-  pub fn ro_rafsi(&self) -> Vec<String> {
+  pub fn rafsi_mei(&self) -> Vec<String> {
     let mut rafsi = self.rafsi.clone();
     if self.klesi == "gismu" {
       rafsi.push((&self.cmene[..4]).to_string());

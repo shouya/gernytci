@@ -91,6 +91,14 @@ impl ToString for Rafsi {
 }
 
 impl Rafsi {
+  pub fn pamoi_lerfu(&self) -> char {
+    self.rafsi.chars().next().unwrap()
+  }
+
+  pub fn romoi_lerfu(&self) -> char {
+    self.rafsi.chars().last().unwrap()
+  }
+
   pub fn klesi(&self) -> Raflei {
     self.rafsi.as_str().try_into().unwrap()
   }
@@ -180,10 +188,12 @@ impl Rafsi {
   pub fn terjonlehu_jvasahe(klesi: Raflei, terjonlehu: Option<char>) -> bool {
     use Raflei::*;
 
+    if terjonlehu.is_none() {
+      return true;
+    }
+
     match (klesi, terjonlehu) {
-      (ky, None) if ky.xu_sampu() => return true,
       (ky, Some(_)) if ky.xu_sampu() => (),
-      (GismuRafsi(_), None) => return true,
       (Brarafsi(_), Some('y')) => return true,
       _ => return false,
     }
