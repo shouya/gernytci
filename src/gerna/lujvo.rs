@@ -25,7 +25,7 @@ impl TryFrom<&str> for Lujvo {
   fn try_from(t: &str) -> Result<Self> {
     Self::genturfahi(t)
       .pop()
-      .ok_or_else(|| anyhow!("Invalid lujvo"))
+      .ok_or_else(|| anyhow!("invalid lujvo"))
   }
 }
 

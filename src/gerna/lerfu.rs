@@ -27,6 +27,14 @@ impl Lerfu {
     }
   }
 
+  pub fn relkarsna_sarxe(remei: &str) -> bool {
+    [
+      "ai", "au", "ei", "ia", "ie", "ii", "io", "iu", "oi", "ua", "ue", "ui",
+      "uo", "uu",
+    ]
+    .contains(&remei)
+  }
+
   pub fn zunsna_sarxe(remei: &str) -> bool {
     let pamoi = remei.chars().nth(0).unwrap();
     let remoi = remei.chars().nth(1).unwrap();

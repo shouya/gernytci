@@ -79,6 +79,29 @@ pub struct Rafsi {
   pub terjonlehu: Option<char>,
 }
 
+impl TryFrom<(&str, Option<char>)> for Rafsi {
+  type Error = anyhow::Error;
+
+  fn try_from(
+    (rafsi_lerpoi, terjonlehu): (&str, Option<char>),
+  ) -> Result<Self> {
+    ensure!(Self::jvasahe(rafsi_lerpoi, terjonlehu), "invalid rafsi");
+
+    Ok(Rafsi {
+      rafsi: rafsi_lerpoi.to_string(),
+      terjonlehu: terjonlehu,
+    })
+  }
+}
+
+impl TryFrom<&str> for Rafsi {
+  type Error = anyhow::Error;
+
+  fn try_from(rafsi_lerpoi: &str) -> Result<Self> {
+    Rafsi::try_from((rafsi_lerpoi, None))
+  }
+}
+
 impl ToString for Rafsi {
   fn to_string(&self) -> String {
     let terjonlehu = match self.terjonlehu {

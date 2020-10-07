@@ -21,6 +21,7 @@ args:
 
 subcommands:
   - hello:
+      hidden: true
       aliases:
         - coi
       about: Greetings!
@@ -88,5 +89,13 @@ subcommands:
             required: true
             multiple: true
 
+  - bai:
+      about: "Find modal tag for specific word and vice versa"
+      args:
+        - word:
+            help: "Enter a modal tag (of selma'o BAI) or a brivla"
+            required: true
+
 settings:
   - SubcommandRequiredElseHelp
+  - InferSubcommands

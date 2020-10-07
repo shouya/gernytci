@@ -13,9 +13,9 @@ pub enum Gimlei {
 impl TryFrom<&str> for Gimlei {
   type Error = anyhow::Error;
 
-  fn try_from(s: &str) -> Result<Self> {
+  fn try_from(valsi: &str) -> Result<Self> {
     use Gimlei::*;
-    match Lerpoi::from(s).sance().as_str() {
+    match Lerpoi::from(valsi).sance().as_str() {
       "CVCCV" => Ok(CVCCV),
       "CCVCV" => Ok(CCVCV),
       _ => bail!("Invalid rafsi"),
@@ -26,12 +26,21 @@ impl TryFrom<&str> for Gimlei {
 #[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct Gismu(String);
 
-impl<T> From<T> for Gismu
-where
-  T: Into<String>,
-{
-  fn from(krati: T) -> Self {
-    Self(krati.into())
+impl TryFrom<&str> for Gismu {
+  type Error = anyhow::Error;
+
+  fn try_from(valsi: &str) -> Result<Self> {
+    match Lerpoi::from(valsi).sance().as_str() {
+      "CVCCV" => Ok(Gismu(valsi.into())),
+      "CCVCV" => Ok(Gismu(valsi.into())),
+      _ => bail!("invalid gismu {}", valsi),
+    }
+  }
+}
+
+impl ToString for Gismu {
+  fn to_string(&self) -> String {
+    self.0.clone()
   }
 }
 

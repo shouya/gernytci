@@ -33,6 +33,7 @@ fn main() -> Result<(), Error> {
     "cut" => katna::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     "convert" => bixygau::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     "lujvo" => jvofihi::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
+    "bai" => bai::pruce(selcuha, &vanbi)?.prina(&vanbi)?,
     _ => panic!("unreachable"),
   };
 
