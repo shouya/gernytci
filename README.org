@@ -49,7 +49,6 @@ Planned features:
 - [X] lujvo - lujvo making tool
 - [ ] grammar - beta grammar checker (camxes)
 - [X] bai - BAI <=> gismu lookup
-- [ ] rafsi - gismu <=> rafsi lookup
 - [ ] lookup - lookup a word in dictionary
 - [ ] example - [[https://tatoeba.org/jbo/][Tatoeba]] search
 - [ ] more...

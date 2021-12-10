@@ -77,6 +77,7 @@ impl Raflei {
 pub struct Rafsi {
   pub rafsi: String,
   pub terjonlehu: Option<char>,
+  raflei: Raflei,
 }
 
 impl TryFrom<(&str, Option<char>)> for Rafsi {
@@ -90,6 +91,7 @@ impl TryFrom<(&str, Option<char>)> for Rafsi {
     Ok(Rafsi {
       rafsi: rafsi_lerpoi.to_string(),
       terjonlehu: terjonlehu,
+      raflei: Raflei::try_from(rafsi_lerpoi)?,
     })
   }
 }
@@ -123,7 +125,7 @@ impl Rafsi {
   }
 
   pub fn klesi(&self) -> Raflei {
-    self.rafsi.as_str().try_into().unwrap()
+    self.raflei
   }
 
   pub fn selpormei(&self) -> usize {
@@ -145,10 +147,12 @@ impl Rafsi {
           cumki.push(Rafsi {
             rafsi: lerpoi.clone(),
             terjonlehu: Some(lerfu),
+            raflei: raflei,
           });
           cumki.push(Rafsi {
             rafsi: lerpoi,
             terjonlehu: None,
+            raflei: raflei,
           })
         }
         Some(_lerfu) if Rafsi::jvasahe(&lerpoi, None) => {
@@ -156,6 +160,7 @@ impl Rafsi {
           cumki.push(Rafsi {
             rafsi: lerpoi,
             terjonlehu: None,
+            raflei: raflei,
           })
         }
         None if Rafsi::jvasahe(&lerpoi, None) => {
@@ -163,6 +168,7 @@ impl Rafsi {
           cumki.push(Rafsi {
             rafsi: lujvo[0..selpormei].to_string(),
             terjonlehu: None,
+            raflei: raflei,
           });
         }
         _ => (),
@@ -178,6 +184,7 @@ impl Rafsi {
 
     Ok(Rafsi {
       rafsi: lerpoi.into(),
+      raflei: Raflei::try_from(lerpoi)?,
       terjonlehu,
     })
   }
